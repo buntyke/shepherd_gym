@@ -41,15 +41,15 @@ class ShepherdEnv(gym.Env):
     def __init__(self, num_sheep=25):
         
         # initialize observation space
-        obs_low = np.array([-1000.0,-1000.0,-1000.0,-1000.0,-1000.0,-1000.0,-1000.0])
-        obs_high = np.array([1000.0,1000.0,1000.0,1000.0,1000.0,1000.0,1000.0])
+        obs_low = np.array(10*[-1000.0])
+        obs_high = np.array(10*[1000.0])
         self.observation_space = spaces.Box(low=obs_low, high=obs_high, dtype=np.float32)
 
         # initialize action space
         self.action_space = spaces.Discrete(9)
 
         # limit episode length
-        self.MAX_STEPS = 1000
+        self.MAX_STEPS = 1500
 
         # create buffer and episode variable
         self.curr_step = -1
@@ -101,9 +101,9 @@ class ShepherdEnv(gym.Env):
         self._take_action(action)
 
         ob = self._get_state()
-        reward = self._get_state()
+        reward = self._get_reward()
 
-        info = {'n':self.num_sheep}
+        info = {'n':self.num_sheep, 'step':self.curr_step, 'episode':self.curr_episode}
 
         if self.curr_step >= self.MAX_STEPS or self.target_distance <= 1.0:
             self.finish = True
@@ -165,9 +165,16 @@ class ShepherdEnv(gym.Env):
         # get the state, reward, finish, info
         state = self._get_state()
         reward = self._get_reward()
-        info = {'n':self.num_sheep}
+        info = {'n':self.num_sheep, 'step':self.curr_step, 'episode':self.curr_episode}
 
         return (state,reward,self.finish,info)
+
+    def close(self):
+        """Clean exit for environment"""
+
+        if self.show_sim:
+            plt.close('all')
+            plt.ioff()
 
     def seed(self, seed):
         """Function to set the seed of env"""
