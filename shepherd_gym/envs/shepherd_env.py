@@ -7,10 +7,13 @@ Simulate the dog-sheep shepherding environment.
 Each episode requires the dog to shepherd the sheep to the goal.
 """
 
+# suppress runtime warnings
+import warnings
+warnings.filterwarnings("ignore")
+
 # core modules
 import gym
 import numpy as np
-import logging.config
 from gym import spaces
 import matplotlib.pyplot as plt
 
@@ -22,8 +25,10 @@ class ShepherdEnv(gym.Env):
     State: 
     1) Position of center of mass (x,y)
     2) Position of farthest sheep (x,y)
-    3) Position of target w.r.t dog (x,y)
-    4) Radius of sheep (r)
+    3) Position of target (x,y)
+    4) Position of dog (x,y)
+    5) Radius of sheep (r)
+    6) Distance to target (d)
 
     Action:
     1) Increment in position of dog (x,y)
@@ -41,9 +46,7 @@ class ShepherdEnv(gym.Env):
         self.observation_space = spaces.Box(low=obs_low, high=obs_high, dtype=np.float32)
 
         # initialize action space
-        act_low = np.array([-10.0,-10.0])
-        act_high = np.array([10.0,10.0])
-        self.action_space = spaces.Box(low=act_low, high=act_high, dtype=np.float32)
+        self.action_space = spaces.Discrete(9)
 
         # limit episode length
         self.MAX_STEPS = 1000
@@ -51,7 +54,6 @@ class ShepherdEnv(gym.Env):
         # create buffer and episode variable
         self.curr_step = -1
         self.curr_episode = -1
-        self.action_episode_memory = []
 
         # radius for sheep to be considered as collected by dog
         self.dog_collect_radius = 2.0
@@ -71,21 +73,8 @@ class ShepherdEnv(gym.Env):
         # assign number of sheep
         self.num_sheep = num_sheep
 
-        # initialize target position
-        self.target = np.array([0,0])
-
-        # initialize sheep positions
-        init_sheep_pose = np.random.uniform(-200.0,200.0,size=(2))
-        self.sheep_poses = (np.random.uniform(-50.0,50.0, size=(self.num_sheep,2))) \
-                           + init_sheep_pose[None,:]
-        self.sheep_com = self.sheep_poses.mean(axis=0)
-
-        # initialize dog position
-        init_dog_pose = init_sheep_pose + 75.0*(2*np.random.randint(2,size=(2))-1)
-        self.dog_pose = init_dog_pose
-
-        # initialize inertia
-        self.inertia = np.ones((self.num_sheep, 2))
+        # flag to show simulation, false by default
+        self.show_sim = False
 
     def step(self, action):
         """
@@ -109,11 +98,31 @@ class ShepherdEnv(gym.Env):
         """
         
         self.curr_step += 1
-        self.__take_action(action)
+        self._take_action(action)
 
         ob = self._get_state()
         reward = self._get_state()
-        return ob, reward, self.finish, {}
+
+        info = {'n':self.num_sheep}
+
+        if self.curr_step >= self.MAX_STEPS or self.target_distance <= 1.0:
+            self.finish = True
+
+        if self.show_sim and self.curr_step%5 == 0:
+            plt.clf()
+
+            plt.scatter(self.target[0], self.target[1], c='g', s=40, label='Goal')
+            plt.scatter(self.dog_pose[0], self.dog_pose[1], c='r', s=50, label='Dog')
+            plt.scatter(self.sheep_poses[:,0], self.sheep_poses[:,1], c='b', s=50, label='Sheep')
+            
+            plt.title('Shepherding')
+            plt.xlim([-300,300])
+            plt.ylim([-300,300])
+            plt.legend()
+            plt.draw()
+            plt.pause(0.01)
+
+        return ob, reward, self.finish, info
 
     def reset(self):
         """
@@ -126,14 +135,25 @@ class ShepherdEnv(gym.Env):
 
         # initialize gym env variables
         self.finish = False
+        self.curr_step = -1
         self.curr_episode += 1
-        self.action_episode_memory.append([])
+
+        # initialize target position
+        self.target = np.random.uniform(-10.0,10.0,size=(2))
 
         # initialize sheep positions
         init_sheep_pose = np.random.uniform(-200.0,200.0,size=(2))
         self.sheep_poses = (np.random.uniform(-50.0,50.0, size=(self.num_sheep,2))) \
                            + init_sheep_pose[None,:]
         self.sheep_com = self.sheep_poses.mean(axis=0)
+
+        # get the farthest sheep and radius of the sheep
+        dist_to_com = np.linalg.norm((self.sheep_poses - self.sheep_com[None,:]), axis=1)
+        self.farthest_sheep = self.sheep_poses[np.argmax(dist_to_com),:]
+        self.radius_sheep = np.array([np.max(dist_to_com)])
+
+        # update distance to target
+        self.target_distance = np.linalg.norm(self.target - self.sheep_com)
 
         # initialize dog position
         init_dog_pose = init_sheep_pose + 75.0*(2*np.random.randint(2,size=(2))-1)
@@ -142,7 +162,12 @@ class ShepherdEnv(gym.Env):
         # initialize inertia
         self.inertia = np.ones((self.num_sheep, 2))
 
-        return self._get_state()
+        # get the state, reward, finish, info
+        state = self._get_state()
+        reward = self._get_reward()
+        info = {'n':self.num_sheep}
+
+        return (state,reward,self.finish,info)
 
     def seed(self, seed):
         """Function to set the seed of env"""
@@ -153,7 +178,31 @@ class ShepherdEnv(gym.Env):
     def _take_action(self, action):
         """Update position of dog based on action and env"""
 
-        self.dog_pose += np.array(action)
+        increment = np.array([0.0,0.0])
+        if action == 0:
+            increment[0] = 1.5
+        elif action == 1:
+            increment[0] = 1.225
+            increment[1] = 1.225
+        elif action == 2:
+            increment[1] = 1.5
+        elif action == 3:
+            increment[0] = -1.225
+            increment[1] = 1.225
+        elif action == 4:
+            increment[0] = -1.5
+        elif action == 5:
+            increment[0] = -1.225
+            increment[1] = -1.225
+        elif action == 6:
+            increment[1] = -1.5
+        elif action == 7:
+            increment[0] = 1.225
+            increment[1] = -1.225
+        else:
+            print('NOP!')
+        
+        self.dog_pose += increment
         self._update_environment()
 
     def _update_environment(self):
@@ -218,11 +267,39 @@ class ShepherdEnv(gym.Env):
         self.sheep_poses += self.delta_sheep_pose*self.inertia
         self.sheep_com = np.mean(self.sheep_poses,axis=0)
 
+        # get the farthest sheep and radius of the sheep
+        dist_to_com = np.linalg.norm((self.sheep_poses - self.sheep_com[None,:]), axis=1)
+        self.farthest_sheep = self.sheep_poses[np.argmax(dist_to_com),:]
+        self.radius_sheep = np.array([np.max(dist_to_com)])
+
+        # update distance to target
+        self.target_distance = np.linalg.norm(self.target - self.sheep_com)
+
     def _get_reward(self):
         """Return reward based on action of the dog"""
 
+        # compute reward depending on the radius and distance to target
+        reward = -(self.target_distance+self.radius_sheep)
+        return reward
+
     def _get_state(self):
         """Return state based on action of the dog"""
-        state = np.hstack((self.sheep_com))
-    def _render(self, mode='human', close=False):
+
+        # stack all variables and return state array
+        state = np.hstack((self.sheep_com, self.farthest_sheep, 
+                    self.target, self.dog_pose, self.radius_sheep, 
+                    self.target_distance))
+        return state
+
+    def render(self, mode='human', close=False):
+
+        if mode == 'human':
+            # create a figure
+            self.fig = plt.figure()
+            plt.ion()
+            plt.show()
+
+            # set the flag for plotting
+            self.show_sim = True
+
         return
