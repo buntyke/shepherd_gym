@@ -200,12 +200,45 @@ class ShepherdSim:
         if np.all(dist_to_dog > 3*self.dog_collect_radius):
             mag = 1.5
         else:
-            mag = 0.3*self.dog_collect_radius
+            mag = 0.75*self.dog_collect_radius
 
         # compute increments in x,y components
         direction = int_goal-self.dog_pose
-        factor = mag/np.linalg.norm(direction)
-        increment = direction*factor
+        direction /= np.linalg.norm(direction)
+
+        # discretize actions
+        theta = np.arctan2(direction[1], direction[0])*180/np.pi
+
+        action = -1
+        increment = np.array([0.0,0.0])
+
+        if theta <= 22.5 and theta >= -22.5:
+            action = 0
+            increment = np.array([1.5,0.0])
+        elif theta <= 67.5 and theta > 22.5:
+            action = 1
+            increment = np.array([1.225,1.225])
+        elif theta <= 112.5 and theta > 67.5:
+            action = 2
+            increment = np.array([0.0,1.5])
+        elif theta <= 157.5 and theta > 112.5:
+            action = 3
+            increment = np.array([-1.225,1.225])
+        elif theta < -157.5 or theta > 157.5:
+            action = 4
+            increment = np.array([-1.5,0.0])
+        elif theta >= -157.5 and theta < -112.5:
+            action = 5
+            increment = np.array([-1.225,-1.225])
+        elif theta >= -112.5 and theta < -67.5:
+            action = 6
+            increment = np.array([0.0,-1.5])
+        elif theta >= -67.5 and theta < -22.5:
+            action = 7
+            increment = np.array([1.225,-1.225])
+        else:
+            print('Error!')
+        print(increment)
 
         # update position
         self.dog_pose = self.dog_pose+increment
