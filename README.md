@@ -11,6 +11,13 @@ shepherd_gym
 
 Gym environment implementation of dog shepherding task
 
+Simulations
+-----------
+
+Heuristic Model
+![](images/heuristic.gif)
+
+
 Usage
 -----
 
@@ -25,7 +32,7 @@ Installation
 ------------
 
 Requirements
-^^^^^^^^^^^^
+------------
 * numpy==1.15.0
 * matplotlib==2.2.2
 
@@ -37,4 +44,4 @@ Compatibility
 Authors
 -------
 
-`shepherd_gym` was written by `Nishanth Koganti <buntyke@gmail.com>`_.
+`shepherd_gym` was written by `Nishanth Koganti <buntyke@gmail.com>`.
