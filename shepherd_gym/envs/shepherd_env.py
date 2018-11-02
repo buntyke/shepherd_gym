@@ -13,6 +13,7 @@ warnings.filterwarnings("ignore")
 
 # core modules
 import gym
+import random
 import numpy as np
 from gym import spaces
 import matplotlib.pyplot as plt
@@ -49,7 +50,7 @@ class ShepherdEnv(gym.Env):
         self.action_space = spaces.Discrete(9)
 
         # limit episode length
-        self.MAX_STEPS = 1500
+        self.MAX_STEPS = 2000
 
         # create buffer and episode variable
         self.curr_step = -1
@@ -155,6 +156,10 @@ class ShepherdEnv(gym.Env):
         # update distance to target
         self.target_distance = np.linalg.norm(self.target - self.sheep_com)
 
+        # initialize values for reward estimation
+        self.init_radius_sheep = self.radius_sheep
+        self.init_target_distance = self.target_distance
+
         # initialize dog position
         init_dog_pose = init_sheep_pose + 75.0*(2*np.random.randint(2,size=(2))-1)
         self.dog_pose = init_dog_pose
@@ -180,7 +185,7 @@ class ShepherdEnv(gym.Env):
         """Function to set the seed of env"""
 
         random.seed(seed)
-        np.random.seed
+        np.random.seed(seed)
 
     def _take_action(self, action):
         """Update position of dog based on action and env"""
@@ -243,8 +248,7 @@ class ShepherdEnv(gym.Env):
         dist_to_dog = np.linalg.norm((self.sheep_poses - self.dog_pose[None,:]), axis=1)
         sheep_inds = np.where(dist_to_dog < self.dog_repulsion_dist)
         near_sheep = sheep_inds[0]
-        num_near_sheep = near_sheep.shape[0]
-
+        
         # repulsion from dog
         repulsion_dog = np.zeros((self.num_sheep,2))
         repulsion_dog[near_sheep,:] = self.sheep_poses[near_sheep,:] - self.dog_pose[None,:]
@@ -281,12 +285,15 @@ class ShepherdEnv(gym.Env):
 
         # update distance to target
         self.target_distance = np.linalg.norm(self.target - self.sheep_com)
-
+    
     def _get_reward(self):
         """Return reward based on action of the dog"""
 
         # compute reward depending on the radius and distance to target
-        reward = -(self.target_distance+self.radius_sheep)
+        radius_reward = -(self.radius_sheep*0.9)/self.init_radius_sheep
+        target_reward = -(self.target_distance*0.9)/self.init_target_distance 
+
+        reward = max(-1.0,target_reward) + max(-1.0,radius_reward)
         return reward
 
     def _get_state(self):
