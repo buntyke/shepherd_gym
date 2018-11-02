@@ -1,10 +1,6 @@
 shepherd_gym
 ============
 
-.. image:: https://img.shields.io/pypi/v/shepherd_gym.svg
-    :target: https://pypi.python.org/pypi/shepherd_gym
-    :alt: Latest PyPI version
-
 .. image:: travis-ci.org/buntyke/shepherd_gym.png
    :target: travis-ci.org/buntyke/shepherd_gym
    :alt: Latest Travis CI build status
@@ -15,8 +11,8 @@ Simulations
 -----------
 
 Heuristic Model
-![](images/heuristic.gif)
 
+![](images/heuristic.gif)
 
 Usage
 -----
@@ -25,16 +21,32 @@ This package has several scripts:
 
 * To run a simulation of the heuristic model:
   ```
-  $ python shepherd_gym/shepherd_sim.py
+  $ python examples/shepherd_sim.py
+  ```
+
+* To test the dog heuristic model with the shepherd gym env:
+  ```
+  $ python examples/shepherd_heuristic.py
+  ```
+
+  The program supports several command line arguments. Check using:
+  ```
+  $ python examples/shepherd_heuristic.py -h
   ```
 
 Installation
 ------------
 
+* The library can be installed by running:
+  ```
+  $ pip install -e .
+  ```
+
 Requirements
 ------------
-* numpy==1.15.0
-* matplotlib==2.2.2
+* gym>=0.10.8 
+* numpy>=1.15.0
+* matplotlib>=2.2.2
 
 Compatibility
 -------------
