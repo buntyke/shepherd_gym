@@ -2,8 +2,8 @@ import io
 import os
 import re
 
-from setuptools import find_packages
 from setuptools import setup
+from setuptools import find_packages
 
 
 def read(filename):
@@ -11,7 +11,6 @@ def read(filename):
     text_type = type(u"")
     with io.open(filename, mode="r", encoding='utf-8') as fd:
         return re.sub(text_type(r':[a-z]+:`~?(.*?)`'), text_type(r'``\1``'), fd.read())
-
 
 setup(
     name="shepherd_gym",
@@ -27,7 +26,9 @@ setup(
 
     packages=find_packages(exclude=('tests',)),
 
-    install_requires=[],
+    install_requires=['gym>=0.10.8',
+                      'numpy>=1.15.0',
+                      'matplotlib>=2.2.2'],
 
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
