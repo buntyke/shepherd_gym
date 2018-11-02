@@ -48,8 +48,11 @@ class ShepherdSim:
         # initialize inertia
         self.inertia = np.ones((self.num_sheep, 2))
 
+        # initialize maximum number of steps
+        self.max_steps = 1500
+
     # main function to perform simulation
-    def run_simulation(self):
+    def run_simulation(self, render=False):
 
         # start the simulation
         print('Start simulation')
@@ -58,12 +61,13 @@ class ShepherdSim:
         counter = 0
 
         # initialize matplotlib figure
-        fig = plt.figure()
-        plt.ion()
-        plt.show()
+        if render:
+            plt.figure()
+            plt.ion()
+            plt.show()
 
         # main loop for simulation
-        while np.linalg.norm(self.target - self.sheep_com) > 1.0:
+        while np.linalg.norm(self.target - self.sheep_com) > 1.0 and counter < self.max_steps:
             # update counter variable
             counter += 1
 
@@ -74,7 +78,7 @@ class ShepherdSim:
             self.update_environment()
 
             # plot every 5th frame
-            if counter%5 == 0:
+            if counter%5 == 0 and render:
                 plt.clf()
 
                 plt.scatter(self.target[0], self.target[1], c='g', s=40, label='Goal')
@@ -121,8 +125,7 @@ class ShepherdSim:
         dist_to_dog = np.linalg.norm((self.sheep_poses - self.dog_pose[None,:]), axis=1)
         sheep_inds = np.where(dist_to_dog < self.dog_repulsion_dist)
         near_sheep = sheep_inds[0]
-        num_near_sheep = near_sheep.shape[0]
-
+        
         # repulsion from dog
         repulsion_dog = np.zeros((self.num_sheep,2))
         repulsion_dog[near_sheep,:] = self.sheep_poses[near_sheep,:] - self.dog_pose[None,:]
@@ -196,12 +199,6 @@ class ShepherdSim:
         # find distances of dog to sheep
         dist_to_dog = np.linalg.norm((self.sheep_poses - self.dog_pose[None,:]), axis=1)
 
-        # solve for size of step
-        if np.all(dist_to_dog > 3*self.dog_collect_radius):
-            mag = 1.5
-        else:
-            mag = 0.75*self.dog_collect_radius
-
         # compute increments in x,y components
         direction = int_goal-self.dog_pose
         direction /= np.linalg.norm(direction)
@@ -209,32 +206,23 @@ class ShepherdSim:
         # discretize actions
         theta = np.arctan2(direction[1], direction[0])*180/np.pi
 
-        action = -1
         increment = np.array([0.0,0.0])
 
         if theta <= 22.5 and theta >= -22.5:
-            action = 0
             increment = np.array([1.5,0.0])
         elif theta <= 67.5 and theta > 22.5:
-            action = 1
             increment = np.array([1.225,1.225])
         elif theta <= 112.5 and theta > 67.5:
-            action = 2
             increment = np.array([0.0,1.5])
         elif theta <= 157.5 and theta > 112.5:
-            action = 3
             increment = np.array([-1.225,1.225])
         elif theta < -157.5 or theta > 157.5:
-            action = 4
             increment = np.array([-1.5,0.0])
         elif theta >= -157.5 and theta < -112.5:
-            action = 5
             increment = np.array([-1.225,-1.225])
         elif theta >= -112.5 and theta < -67.5:
-            action = 6
             increment = np.array([0.0,-1.5])
         elif theta >= -67.5 and theta < -22.5:
-            action = 7
             increment = np.array([1.225,-1.225])
         else:
             print('Error!')
@@ -245,7 +233,7 @@ class ShepherdSim:
 
 def main():
     shepherd_env = ShepherdSim()
-    shepherd_env.run_simulation()
+    shepherd_env.run_simulation(render=True)
 
 if __name__=='__main__':
     main()
