@@ -1,3 +1,6 @@
+# package specific
+data/
+
 *.py[cod]
 
 # C extensions

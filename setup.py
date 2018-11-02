@@ -24,7 +24,7 @@ setup(
     description="Gym environment implementation of dog shepherding task",
     long_description=read("README.md"),
 
-    packages=find_packages(exclude=('tests',)),
+    packages=find_packages(exclude=('tests','examples')),
 
     install_requires=['gym>=0.10.8',
                       'numpy>=1.15.0',
