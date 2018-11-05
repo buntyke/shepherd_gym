@@ -14,5 +14,5 @@ script:
   - pytest --cov=./
 
 # command after success
-after_sucess:
+after_success:
   - codecov
