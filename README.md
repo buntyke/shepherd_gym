@@ -9,9 +9,17 @@ Gym environment implementation of dog shepherding task
 Simulations
 -----------
 
-Heuristic Model
+Heuristic model simulation (generated using matplotlib):
 
-![](images/heuristic.gif)
+![heuristic model simulation](images/heuristic.gif)
+
+Rewards for heuristic model (rewards keep increasing):
+
+![heuristic model rewards](images/heuristic_rewards.png)
+
+Rewards for random model (rewards remain low):
+
+![random model rewards](images/random_rewards.png)
 
 Usage
 -----
