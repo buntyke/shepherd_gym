@@ -4,6 +4,7 @@
 # core modules
 import gym
 import unittest
+import numpy as np
 import shepherd_gym
 
 class Environments(unittest.TestCase):
@@ -13,17 +14,16 @@ class Environments(unittest.TestCase):
         env.seed(0)
         env.render()
         env.reset()
-        env.step(0)
+        for act in range(9):
+            env.step(act)
         env.close()
 
     def test_heuristic(self):
         env = gym.make('Shepherd-v0')
-        env.seed(0)
-        env.render()
-        (state,_,_,info) = env.reset()
-        action = shepherd_gym.dog_heuristic_model(state,info)
-        env.step(action)
-        env.close()
+        (state,_,finish,info) = env.reset()
+        while not finish:
+            action = shepherd_gym.dog_heuristic_model(state,info)
+            (state,_,finish,info) = env.step(action)
 
     def test_sim(self):
         sim = shepherd_gym.ShepherdSim()
