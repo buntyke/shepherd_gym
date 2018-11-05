@@ -7,7 +7,7 @@ python:
 # command to install dependencies
 install:
   - pip install -e .
-  - pip install codecov
+  - pip install codecov pytest pytest-cov
 
 # command to run tests
 script:
