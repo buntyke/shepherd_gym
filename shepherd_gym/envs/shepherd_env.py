@@ -11,6 +11,9 @@ Each episode requires the dog to shepherd the sheep to the goal.
 import warnings
 warnings.filterwarnings("ignore")
 
+# ipython debugging
+from IPython.terminal.debugger import set_trace as keyboard
+
 # core modules
 import gym
 import random
@@ -47,7 +50,7 @@ class ShepherdEnv(gym.Env):
         self.observation_space = spaces.Box(low=obs_low, high=obs_high, dtype=np.float32)
 
         # initialize action space
-        self.action_space = spaces.Discrete(9)
+        self.action_space = spaces.Discrete(8)
 
         # limit episode length
         self.MAX_STEPS = 2000
@@ -294,6 +297,10 @@ class ShepherdEnv(gym.Env):
         target_reward = -(self.target_distance*0.9)/self.init_target_distance 
 
         reward = max(-1.0,target_reward) + max(-1.0,radius_reward)
+
+        # ensure it is always an array
+        if not type(reward) is np.ndarray:
+            reward = np.array([reward])
         return reward
 
     def _get_state(self):
