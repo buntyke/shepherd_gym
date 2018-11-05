@@ -1,9 +1,7 @@
 shepherd_gym
 ============
 
-.. image:: https://travis-ci.org/buntyke/shepherd_gym.png
-   :target: https://travis-ci.org/buntyke/shepherd_gym
-   :alt: Latest Travis CI build status
+[![Build Status](https://travis-ci.org/buntyke/shepherd_gym.png)](https://travis-ci.org/buntyke/shepherd_gym)
 
 Gym environment implementation of dog shepherding task
 
