@@ -2,6 +2,7 @@
 data/
 
 *.py[cod]
+coverage.xml
 
 # C extensions
 *.so

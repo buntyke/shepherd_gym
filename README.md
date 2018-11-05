@@ -2,6 +2,7 @@ shepherd_gym
 ============
 
 [![Build Status](https://travis-ci.org/buntyke/shepherd_gym.png)](https://travis-ci.org/buntyke/shepherd_gym)
+[![codecov.io](https://codecov.io/github/buntyke/shepherd_gym/coverage.svg?branch=master)](https://codecov.io/github/buntyke/shepherd_gym?branch=master)
 
 Gym environment implementation of dog shepherding task
 
