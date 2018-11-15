@@ -26,7 +26,7 @@ setup(
 
     packages=find_packages(exclude=('tests','examples')),
 
-    install_requires=['gym>=0.10.8',
+    install_requires=['gym>=0.10.5',
                       'numpy>=1.15.0',
                       'matplotlib>=2.2.2'],
 

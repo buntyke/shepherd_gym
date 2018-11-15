@@ -20,7 +20,7 @@ class DQN(nn.Module):
         super(DQN, self).__init__()
 
         # 3 fully connected layers
-        self.linear1 = nn.Linear(10, 256)
+        self.linear1 = nn.Linear(10,256)
         self.linear2 = nn.Linear(256,64)
         self.linear3 = nn.Linear(64,8)
 

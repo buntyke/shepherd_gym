@@ -75,19 +75,21 @@ class ReplayMemory(object):
 # define class to train network
 class DQNAgent():
 
-    def __init__(self, use_cuda = True):
+    def __init__(self, cuda = True, render = False):
 
         # initialize gym environment
         self.env = gym.make('Shepherd-v0')
 
-        self.env.render()
+        if render:
+            self.env.render()
+        
         self.n_actions = 8
 
         # hyper parameters for training
         self.gamma = 0.9
         self.eps_end = 0.05
         self.eps_start = 0.9
-        self.eps_decay = 1000
+        self.eps_decay = 500000
         self.batch_size = 128
 
         # use gpu
@@ -179,14 +181,16 @@ def main():
     parser = argparse.ArgumentParser(description='Script to train dqn agent for shepherd env')
 
     # add arguments
-    parser.add_argument('--episodes', type=int, default=100)
+    parser.add_argument('--episodes', type=int, default=1000, help='number of episodes')
+    parser.add_argument('--render', action='store_true', default=False, help='flag to render simulation')
+    parser.add_argument('--nocuda', dest='cuda', action='store_false', default=True, help='flag to run on cpu')
     args = parser.parse_args()
 
     greedy = False
     n_episodes = args.episodes
 
     # initialize trainer
-    agent = DQNAgent()
+    agent = DQNAgent(cuda=args.cuda,render=args.render)
 
     # perform training
     for ep in range(n_episodes):

@@ -53,7 +53,12 @@ class ShepherdEnv(gym.Env):
         self.action_space = spaces.Discrete(8)
 
         # limit episode length
-        self.MAX_STEPS = 2000
+        self.MAX_STEPS = 500
+
+        # conditions to terminate
+        self.boundary = 400.0
+        self.max_radius = 75.0
+        self.max_distance = 250.0
 
         # create buffer and episode variable
         self.curr_step = -1
@@ -103,25 +108,35 @@ class ShepherdEnv(gym.Env):
         
         self.curr_step += 1
         self._take_action(action)
+        self._take_action(action)
+        self._take_action(action)
 
         ob = self._get_state()
         reward = self._get_reward()
 
         info = {'n':self.num_sheep, 'step':self.curr_step, 'episode':self.curr_episode}
 
-        if self.curr_step >= self.MAX_STEPS or self.target_distance <= 1.0:
+        if self.curr_step >= self.MAX_STEPS or self.target_distance >= self.max_distance \
+           or self.mean_radius_sheep >= self.max_radius:
+            reward = -10
+            self.finish = True
+        if self.target_distance <= 1.0:
+            reward = 10
             self.finish = True
 
         if self.show_sim and self.curr_step%5 == 0:
             plt.clf()
-
+            
+            theta = np.linspace(0.0,2*np.pi, num=100)
+            plt.plot(self.boundary*np.cos(theta),self.boundary*np.sin(theta),'-k',linewidth=3)
+            
             plt.scatter(self.target[0], self.target[1], c='g', s=40, label='Goal')
             plt.scatter(self.dog_pose[0], self.dog_pose[1], c='r', s=50, label='Dog')
             plt.scatter(self.sheep_poses[:,0], self.sheep_poses[:,1], c='b', s=50, label='Sheep')
             
             plt.title('Shepherding')
-            plt.xlim([-300,300])
-            plt.ylim([-300,300])
+            plt.xlim([-self.boundary,self.boundary])
+            plt.ylim([-self.boundary,self.boundary])
             plt.legend()
             plt.draw()
             plt.pause(0.01)
@@ -283,8 +298,9 @@ class ShepherdEnv(gym.Env):
 
         # get the farthest sheep and radius of the sheep
         dist_to_com = np.linalg.norm((self.sheep_poses - self.sheep_com[None,:]), axis=1)
-        self.farthest_sheep = self.sheep_poses[np.argmax(dist_to_com),:]
         self.radius_sheep = np.array([np.max(dist_to_com)])
+        self.mean_radius_sheep = np.array([np.mean(dist_to_com)])
+        self.farthest_sheep = self.sheep_poses[np.argmax(dist_to_com),:]
 
         # update distance to target
         self.target_distance = np.linalg.norm(self.target - self.sheep_com)
@@ -296,7 +312,7 @@ class ShepherdEnv(gym.Env):
         radius_reward = -(self.radius_sheep*0.9)/self.init_radius_sheep
         target_reward = -(self.target_distance*0.9)/self.init_target_distance 
 
-        reward = max(-1.0,target_reward) + max(-1.0,radius_reward)
+        reward = (max(-1.0,target_reward) + max(-1.0,radius_reward))/2.0
 
         # ensure it is always an array
         if not type(reward) is np.ndarray:
