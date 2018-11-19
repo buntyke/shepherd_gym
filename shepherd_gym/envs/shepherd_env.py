@@ -118,10 +118,10 @@ class ShepherdEnv(gym.Env):
 
         if self.curr_step >= self.MAX_STEPS or self.target_distance >= self.max_distance \
            or self.mean_radius_sheep >= self.max_radius:
-            reward = -10
+            reward = np.array([-10.0])
             self.finish = True
         if self.target_distance <= 1.0:
-            reward = 10
+            reward = np.array([10.0])
             self.finish = True
 
         if self.show_sim and self.curr_step%5 == 0:
