@@ -79,7 +79,7 @@ def main():
         trial_data = np.zeros((0,2*n_state+2))
 
         # reset the environment
-        (state, reward, finish, info) = shepherd_env.reset()
+        state = shepherd_env.reset()
         
         # run the main simulation
         while not finish:

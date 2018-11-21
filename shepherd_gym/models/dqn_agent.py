@@ -3,7 +3,6 @@
 
 """
 Implement deep q-network based agent to solve shepherding task
-
 The neural network is implemented using the pytorch library
 """
 

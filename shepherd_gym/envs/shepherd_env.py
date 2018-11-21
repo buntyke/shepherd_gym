@@ -112,7 +112,6 @@ class ShepherdEnv(gym.Env):
         self._take_action(action)
 
         ob = self._get_state()
-        reward = self._get_reward()
 
         info = {'n':self.num_sheep, 'step':self.curr_step, 'episode':self.curr_episode}
 
@@ -120,9 +119,11 @@ class ShepherdEnv(gym.Env):
            or self.mean_radius_sheep >= self.max_radius:
             reward = np.array([-10.0])
             self.finish = True
-        if self.target_distance <= 1.0:
+        elif self.target_distance <= 1.0:
             reward = np.array([10.0])
             self.finish = True
+        else:
+            reward = self._get_reward()
 
         if self.show_sim and self.curr_step%5 == 0:
             plt.clf()
@@ -187,10 +188,8 @@ class ShepherdEnv(gym.Env):
 
         # get the state, reward, finish, info
         state = self._get_state()
-        reward = self._get_reward()
-        info = {'n':self.num_sheep, 'step':self.curr_step, 'episode':self.curr_episode}
-
-        return (state,reward,self.finish,info)
+        
+        return state
 
     def close(self):
         """Clean exit for environment"""
@@ -312,7 +311,7 @@ class ShepherdEnv(gym.Env):
         radius_reward = -(self.radius_sheep*0.9)/self.init_radius_sheep
         target_reward = -(self.target_distance*0.9)/self.init_target_distance 
 
-        reward = (max(-1.0,target_reward) + max(-1.0,radius_reward))/2.0
+        reward = 1.0 - (max(-1.0,target_reward) + max(-1.0,radius_reward))/2.0
 
         # ensure it is always an array
         if not type(reward) is np.ndarray:

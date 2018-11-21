@@ -195,7 +195,7 @@ def main():
     # perform training
     for ep in range(n_episodes):
         # initialize the environment and state
-        (state,reward,done,info) = agent.env.reset()
+        state = agent.env.reset()
         state = FloatTensor([state])
 
         # run final episode with greedy policy without exploration
@@ -206,9 +206,9 @@ def main():
             # select and perform an action
             action = agent.select_action(state, greedy=greedy)
             tmp_action = action.clone()
-            next_state, reward, done, info = agent.env.step(tmp_action[0, 0].cpu().numpy())
+            next_state, reward, done, _ = agent.env.step(tmp_action.cpu().numpy()[0, 0])
 
-            reward = FloatTensor(reward)
+            reward = FloatTensor([reward])
             next_state = FloatTensor([next_state])
             
             # Store the transition in memory
