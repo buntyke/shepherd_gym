@@ -32,7 +32,7 @@ def main():
     env = gym.make(env_name)
     env = DummyVecEnv([lambda: env])
 
-    if policy='mlp':
+    if policy=='mlp':
         policy_type = MlpPolicy
     else:
         policy_type = MlpLstmPolicy

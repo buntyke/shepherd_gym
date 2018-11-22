@@ -20,7 +20,10 @@ class Environments(unittest.TestCase):
 
     def test_heuristic(self):
         env = gym.make('Shepherd-v0')
-        (state,_,finish,info) = env.reset()
+        env.print_info = True
+        env.reset()
+
+        (state,_,finish,info) = env.step(0)
         while not finish:
             action = shepherd_gym.dog_heuristic_model(state,info)
             (state,_,finish,info) = env.step(action)

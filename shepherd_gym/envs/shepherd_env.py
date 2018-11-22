@@ -167,7 +167,7 @@ class ShepherdEnv(gym.Env):
 
         # initialize sheep positions
         init_sheep_pose = np.random.uniform(-200.0,200.0,size=(2))
-        self.sheep_poses = (np.random.uniform(-50.0,50.0, size=(self.num_sheep,2))) \
+        self.sheep_poses = (np.random.uniform(-40.0,40.0, size=(self.num_sheep,2))) \
                            + init_sheep_pose[None,:]
         self.sheep_com = self.sheep_poses.mean(axis=0)
 
@@ -184,7 +184,8 @@ class ShepherdEnv(gym.Env):
         self.init_target_distance = self.target_distance
 
         # initialize dog position
-        init_dog_pose = init_sheep_pose + 75.0*(2*np.random.randint(2,size=(2))-1)
+        init_theta = np.random.uniform(-np.pi,np.pi)
+        init_dog_pose = init_sheep_pose + 50.0*np.array([np.cos(init_theta),np.sin(init_theta)])
         self.dog_pose = init_dog_pose
 
         # initialize inertia

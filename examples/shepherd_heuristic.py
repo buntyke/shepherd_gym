@@ -24,8 +24,8 @@ def main():
     # setup argument parser
     parser = argparse.ArgumentParser(description='Test heuristic model with shepherd env')
 
-    parser.add_argument('-e' ,'--experiment', default='Heuristic', type=str, help='name of the experiment')
-    parser.add_argument('-m', '--model', default='Heuristic', type=str, help='name of model to use')
+    parser.add_argument('-e' ,'--experiment', default='heuristic', type=str, help='name of the experiment')
+    parser.add_argument('-m', '--model', default='heuristic', type=str, help='name of model to use')
 
     parser.add_argument('-n', '--ntrials', default=5, type=int, help='number of episodes')
     parser.add_argument('-s', '--seed', default=41, type=int, help='seed value for reproducibility')
@@ -61,6 +61,7 @@ def main():
     # create the environment
     shepherd_env = gym.make('Shepherd-v0')
     shepherd_env.seed(seed)
+    shepherd_env.print_info = True
 
     # render the simulation
     if render_sim:
@@ -80,11 +81,12 @@ def main():
 
         # reset the environment
         state = shepherd_env.reset()
-        
+
         # run the main simulation
+        (state,_,finish,info) = shepherd_env.step(0)
         while not finish:
             # get the dog's action
-            if model == 'Heuristic':
+            if model == 'heuristic':
                 action = dog_heuristic_model(state, info)
             else:
                 action = np.random.randint(8)
