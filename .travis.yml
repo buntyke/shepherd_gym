@@ -1,4 +1,5 @@
 language: python
+sudo: required
 python:
   - "3.5"
   - "3.6"
@@ -6,8 +7,8 @@ python:
 
 # command to install dependencies
 install:
-  - apt-get update 
-  - apt-get install cmake libopenmpi-dev python3-dev zlib1g-dev
+  - sudo apt-get update 
+  - sudo apt-get install -y cmake libopenmpi-dev python3-dev zlib1g-dev
   - pip install -e .
   - pip install codecov pytest pytest-cov
 
