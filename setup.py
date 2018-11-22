@@ -28,7 +28,9 @@ setup(
 
     install_requires=['gym>=0.10.5',
                       'numpy>=1.15.0',
-                      'matplotlib>=2.2.2'],
+                      'matplotlib>=2.2.2',
+                      'stable-baselines>=2.2.1',
+                      'ipython>=7.1.1'],
 
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
