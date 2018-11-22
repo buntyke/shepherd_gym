@@ -21,7 +21,7 @@ import numpy as np
 from gym import spaces
 import matplotlib.pyplot as plt
 
-class ShepherdEnv(gym.Env):
+class ShepherdFixedEnv(gym.Env):
     """
     Define the shepherding environment.
     The environment treats the dog as the agent and the sheep as a part of the environment.
@@ -163,10 +163,10 @@ class ShepherdEnv(gym.Env):
         self.curr_episode += 1
 
         # initialize target position
-        self.target = np.random.uniform(-10.0,10.0,size=(2))
+        self.target = np.zeros(2)
 
         # initialize sheep positions
-        init_sheep_pose = np.random.uniform(-200.0,200.0,size=(2))
+        init_sheep_pose = np.array([75.0,75.0])
         self.sheep_poses = (np.random.uniform(-50.0,50.0, size=(self.num_sheep,2))) \
                            + init_sheep_pose[None,:]
         self.sheep_com = self.sheep_poses.mean(axis=0)
@@ -184,7 +184,7 @@ class ShepherdEnv(gym.Env):
         self.init_target_distance = self.target_distance
 
         # initialize dog position
-        init_dog_pose = init_sheep_pose + 75.0*(2*np.random.randint(2,size=(2))-1)
+        init_dog_pose = np.array([0.0,75.0])
         self.dog_pose = init_dog_pose
 
         # initialize inertia
