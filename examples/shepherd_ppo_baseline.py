@@ -47,7 +47,7 @@ def main():
 
     env.render()
     obs = env.reset()
-    for i in range(1000):
+    for _ in range(1000):
         action, _states = model.predict(obs)
         obs, _, _, _ = env.step(action)
 
