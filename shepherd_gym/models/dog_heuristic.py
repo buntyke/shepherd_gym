@@ -32,6 +32,9 @@ def dog_heuristic_model(state, info):
     if radius_sheep < field:
         is_within_field = True
 
+    # assign dog_mode
+    dog_mode = -1
+
     # determine the dog position
     if is_within_field:
         # perform herding
@@ -44,6 +47,7 @@ def dog_heuristic_model(state, info):
         factor = dog_collect_radius*(np.sqrt(num_sheep))
 
         # get intermediate herding goal
+        dog_mode = 0
         int_goal = sheep_com + (direction*factor)
     else:
         # perform collecting
@@ -56,6 +60,7 @@ def dog_heuristic_model(state, info):
         factor = dog_collect_radius
 
         # get intermediate collecting goal
+        dog_mode = 1
         int_goal = farthest_sheep + (direction*factor)
 
     # compute increments in x,y components
@@ -85,4 +90,4 @@ def dog_heuristic_model(state, info):
     else:
         print('Error!')
 
-    return action
+    return action, int_goal, dog_mode

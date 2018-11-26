@@ -37,7 +37,7 @@ def main():
     else:
         policy_type = MlpLstmPolicy
 
-    model = PPO2(policy_type, env, verbose=1, tensorboard_log=log_path)
+    model = PPO2(policy_type, env, verbose=1, tensorboard_log=log_path, nminibatches=1)
 
     if mode == 'train':
         model.learn(total_timesteps=timesteps)

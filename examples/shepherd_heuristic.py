@@ -77,7 +77,7 @@ def main():
     for n in range(n_trials):
 
         # initialize trial data variable
-        trial_data = np.zeros((0,2*n_state+2))
+        trial_data = np.zeros((0,2*n_state+5))
 
         # reset the environment
         state = shepherd_env.reset()
@@ -87,19 +87,25 @@ def main():
         while not finish:
             # get the dog's action
             if model == 'heuristic':
-                action = dog_heuristic_model(state, info)
+                action, int_goal, dog_mode = dog_heuristic_model(state, info)
             else:
+                dog_mode = -1.0
+                int_goal = np.array([0.0,0.0])
                 action = np.random.randint(8)
 
             # execute the action and update the state
             (new_state, reward, finish, info) = shepherd_env.step(action)
 
             # append to variable
-            sample = np.hstack((state,np.array([action,reward]),new_state))
+            sample = np.hstack((state,int_goal,np.array([dog_mode,action,reward]),new_state))
             trial_data = np.vstack((trial_data,sample[None,:]))
 
             # update state
             state = new_state
+
+        # check for failure
+        if trial_data[-1,n_state+4] == -10.0:
+            print('Fail!')
 
         # append to the dataset
         dataset.append(trial_data)
@@ -114,19 +120,21 @@ def main():
     # store experience to files
     if store_dataset:
         for n in range(n_trials):
-            np.savetxt(f'{exp_path}/trial{n+1}', dataset[n], fmt='%.3f')
+            np.savetxt(f'{exp_path}/trial{n+1}', dataset[n], 
+                       fmt='%.3f', delimiter=',')
 
     # plot the generated rewards
     if plot_dataset:
         plt.figure()
 
         for n in range(n_trials):
-            x_data = np.arange(n_samples[n])
-            plt.plot(x_data,dataset[n][:,n_state+1],'-',linewidth=2,label=f'Ep {n+1}')
+            if n%4 == 0:
+                x_data = np.arange(n_samples[n])
+                plt.plot(x_data,dataset[n][:,n_state+4],'-',linewidth=2,label=f'Ep {n+1}')
         
-        plt.xlabel('# Steps')
-        plt.ylabel('Reward r(t)')
-        plt.title(f'{model} Model')
+        plt.xlabel('# steps')
+        plt.ylabel('reward r(t)')
+        plt.title(f'{model} model')
         plt.legend(bbox_to_anchor=(1.2, 1.0))
 
         plt.tight_layout()

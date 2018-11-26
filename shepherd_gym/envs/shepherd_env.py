@@ -53,12 +53,12 @@ class ShepherdEnv(gym.Env):
         self.action_space = spaces.Discrete(8)
 
         # limit episode length
-        self.MAX_STEPS = 500
+        self.max_steps = 500
 
         # conditions to terminate
         self.boundary = 400.0
-        self.max_radius = 75.0
-        self.max_distance = 250.0
+        self.max_radius = 100.0
+        self.max_distance = 300.0
 
         # create buffer and episode variable
         self.curr_step = -1
@@ -119,7 +119,7 @@ class ShepherdEnv(gym.Env):
 
         ob = self._get_state()
 
-        if self.curr_step >= self.MAX_STEPS or self.target_distance >= self.max_distance \
+        if self.curr_step >= self.max_steps or self.target_distance >= self.max_distance \
            or self.mean_radius_sheep >= self.max_radius:
             reward = np.array([-10.0])
             self.finish = True
@@ -204,7 +204,7 @@ class ShepherdEnv(gym.Env):
             init_dog_pose = np.array([0.0,75.0])
         else:
             init_theta = np.random.uniform(-np.pi,np.pi)
-            init_dog_pose = init_sheep_pose + 50.0*np.array([np.cos(init_theta),np.sin(init_theta)])
+            init_dog_pose = init_sheep_pose + 40.0*np.array([np.cos(init_theta),np.sin(init_theta)])
         self.dog_pose = init_dog_pose
 
         # initialize inertia
