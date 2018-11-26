@@ -1,5 +1,6 @@
 # package specific
 data/
+results/
 
 *.py[cod]
 coverage.xml
