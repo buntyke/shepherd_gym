@@ -11,5 +11,6 @@ register(
 
 register(
     id='Shepherd-v1',
-    entry_point='shepherd_gym.envs:ShepherdFixedEnv',
+    entry_point='shepherd_gym.envs:ShepherdEnv',
+    kwargs={'fixed_reset' : True, 'info_mode' : 1}
 )

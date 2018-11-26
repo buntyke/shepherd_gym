@@ -42,7 +42,7 @@ class ShepherdEnv(gym.Env):
     2) Negative of com distance to target (d_t)
     """
 
-    def __init__(self, num_sheep=25, print_info=False):
+    def __init__(self, num_sheep=25, info_mode=0, fixed_reset=False):
         
         # initialize observation space
         obs_low = np.array(10*[-1000.0])
@@ -84,7 +84,12 @@ class ShepherdEnv(gym.Env):
 
         # flag to show simulation, false by default
         self.show_sim = False
-        self.print_info = print_info
+        self.info_mode = info_mode
+        self.fixed_reset = fixed_reset
+
+        # info variables
+        self.episode_length = 0.0
+        self.episode_reward = 0.0
 
     def step(self, action):
         """
@@ -114,11 +119,6 @@ class ShepherdEnv(gym.Env):
 
         ob = self._get_state()
 
-        if self.print_info:
-            info = {'n':self.num_sheep, 'step':self.curr_step, 'episode':self.curr_episode}
-        else:
-            info = {}
-
         if self.curr_step >= self.MAX_STEPS or self.target_distance >= self.max_distance \
            or self.mean_radius_sheep >= self.max_radius:
             reward = np.array([-10.0])
@@ -129,6 +129,17 @@ class ShepherdEnv(gym.Env):
         else:
             reward = self._get_reward()
 
+        # update rl parameters
+        self.episode_length += 1
+        self.episode_reward += reward
+
+        # generate info return parameter
+        if self.info_mode == 1 and self.finish:
+            info = {'r':self.episode_reward, 'l':self.episode_length}
+        else:
+            info = {'n':self.num_sheep}
+
+        # render environment
         if self.show_sim and self.curr_step%5 == 0:
             plt.clf()
             
@@ -166,9 +177,14 @@ class ShepherdEnv(gym.Env):
         self.target = np.random.uniform(-10.0,10.0,size=(2))
 
         # initialize sheep positions
-        init_sheep_pose = np.random.uniform(-200.0,200.0,size=(2))
-        self.sheep_poses = (np.random.uniform(-40.0,40.0, size=(self.num_sheep,2))) \
-                           + init_sheep_pose[None,:]
+        if self.fixed_reset:
+            init_sheep_pose = np.array([75.0,75.0])
+            self.sheep_poses = (np.random.uniform(-50.0,50.0, size=(self.num_sheep,2))) \
+                               + init_sheep_pose[None,:]
+        else:
+            init_sheep_pose = np.random.uniform(-200.0,200.0,size=(2))
+            self.sheep_poses = (np.random.uniform(-40.0,40.0, size=(self.num_sheep,2))) \
+                               + init_sheep_pose[None,:]
         self.sheep_com = self.sheep_poses.mean(axis=0)
 
         # get the farthest sheep and radius of the sheep
@@ -184,12 +200,19 @@ class ShepherdEnv(gym.Env):
         self.init_target_distance = self.target_distance
 
         # initialize dog position
-        init_theta = np.random.uniform(-np.pi,np.pi)
-        init_dog_pose = init_sheep_pose + 50.0*np.array([np.cos(init_theta),np.sin(init_theta)])
+        if self.fixed_reset:
+            init_dog_pose = np.array([0.0,75.0])
+        else:
+            init_theta = np.random.uniform(-np.pi,np.pi)
+            init_dog_pose = init_sheep_pose + 50.0*np.array([np.cos(init_theta),np.sin(init_theta)])
         self.dog_pose = init_dog_pose
 
         # initialize inertia
         self.inertia = np.ones((self.num_sheep, 2))
+
+        # initialize episode reward and length
+        self.episode_reward = 0
+        self.episode_length = 0
 
         # get the state, reward, finish, info
         state = self._get_state()

@@ -18,9 +18,17 @@ class Environments(unittest.TestCase):
             env.step(act)
         env.close()
 
+    def test_fixed_env(self):
+        env = gym.make('Shepherd-v1')
+        env.seed(0)
+        env.render()
+        env.reset()
+        for act in range(9):
+            env.step(act)
+        env.close()
+
     def test_heuristic(self):
         env = gym.make('Shepherd-v0')
-        env.print_info = True
         env.reset()
 
         (state,_,finish,info) = env.step(0)

@@ -24,7 +24,6 @@ def dog_heuristic_model(state, info):
     target = state[4:6]
     dog_pose = state[6:8]
     radius_sheep = state[8]
-    target_distance = state[9]
 
     # check if sheep are within field
     field = dog_collect_radius*(num_sheep**(2/3))
