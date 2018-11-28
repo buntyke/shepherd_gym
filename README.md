@@ -47,32 +47,34 @@ Follow the following sequence to experiment with imitation learning
 
 * Generate training dataset using the shepherd env:
   ```
-  $ python examples/shepherd_heuristic.py -e heuristic -n 1000 --store --norender --noplot
+  $ cd examples
+  $ python shepherd_heuristic.py -e heuristic -n 1000 --store --norender --noplot
   ```
   This should create the shepherding data for 1000 trials in the `data` folder.
 
 * Preprocess the training dataset into a pickle file:
   ```
-  $ python examples/dataset_process.py -d ../data/heuristic
+  $ python dataset_process.py -d ../data/heuristic
   ```
   This should create a pickle file with processed dataset.
 
 * Training imitation learning model:
   ```
-  $ python examples/shepherd_imitation.py -e heuristic 
+  $ python shepherd_imitation.py -e heuristic 
   ```
   This will train a policy network using the expert dataset and store in `results` folder.
 
 * View training performance using tensorboard:
   ```
-  $ cd results/imitation
+  $ cd ../results/imitation
   $ tensorboard --logdir=.
   ```
   Open a webbrowser and check the URL: `localhost:6006`.
 
 * Test performance of imitation learning model:
   ```
-  $ python examples/shepherd_imitation.py -e heuristic -m test
+  $ cd examples
+  $ python shepherd_imitation.py -e heuristic -m test
   ```
   This should render the environment window showing performance of IL agent.
 
