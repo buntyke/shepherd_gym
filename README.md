@@ -21,6 +21,21 @@ Rewards for random model (rewards remain low):
 
 ![random model rewards](images/random_rewards.png)
 
+Installation
+------------
+
+* Package `stable-baselines` requires the following dependencies
+  ```
+  $ sudo apt update
+  $ sudo apt install -y cmake libopenmpi-dev python3-dev zlib1g-dev
+  ```
+
+* The library can be installed by running:
+  ```
+  $ pip install -e .
+  ```
+
+
 Usage
 -----
 
@@ -41,13 +56,41 @@ This package has several scripts:
   $ python examples/shepherd_heuristic.py -h
   ```
 
-Installation
-------------
+Imitation Learning
+------------------
 
-* The library can be installed by running:
+Follow the following sequence to experiment with imitation learning
+
+* Generate training dataset using the shepherd env:
   ```
-  $ pip install -e .
+  $ python examples/shepherd_heuristic.py -e heuristic -n 1000 --store --norender --noplot
   ```
+  This should create the shepherding data for 1000 trials in the `data` folder.
+
+* Preprocess the training dataset into a pickle file:
+  ```
+  $ python examples/dataset_process.py -d ../data/heuristic
+  ```
+  This should create a pickle file with processed dataset.
+
+* Training imitation learning model:
+  ```
+  $ python examples/shepherd_imitation.py -e heuristic 
+  ```
+  This will train a policy network using the expert dataset and store in `results` folder.
+
+* View training performance using tensorboard:
+  ```
+  $ cd results/imitation
+  $ tensorboard --logdir=.
+  ```
+  Open a webbrowser and check the URL: `localhost:6006`.
+
+* Test performance of imitation learning model:
+  ```
+  $ python examples/shepherd_imitation.py -e heuristic -m test
+  ```
+  This should render the environment window showing performance of IL agent.
 
 Requirements
 ------------
@@ -59,8 +102,9 @@ Compatibility
 -------------
 
 * python>=3.5 
+* Note: There are some issues with python 3.7 due to stable-baselines dependency. However, it will work without that dependency.
 
 Authors
 -------
 
-`shepherd_gym` was written by `Nishanth Koganti <buntyke@gmail.com>`.
+`shepherd_gym` was written by `Clark Kendrick Go, Nishanth Koganti`.
