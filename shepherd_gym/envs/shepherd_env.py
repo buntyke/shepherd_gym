@@ -67,6 +67,11 @@ class ShepherdEnv(gym.Env):
         # radius for sheep to be considered as collected by dog
         self.dog_collect_radius = 2.0
 
+        # parameters for initialization
+        self.init_sheep_root = 200.0
+        self.init_sheep_range = 50.0
+        self.init_dog_distance = 60.0
+
         # weight multipliers for sheep forces
         self.com_term = 1.05
         self.noise_term = 0.3
@@ -178,13 +183,15 @@ class ShepherdEnv(gym.Env):
 
         # initialize sheep positions
         if self.fixed_reset:
-            init_sheep_pose = np.array([75.0,75.0])
-            self.sheep_poses = (np.random.uniform(-50.0,50.0, size=(self.num_sheep,2))) \
+            init_sheep_pose = np.array([75.0, 75.0])
+            self.sheep_poses = (np.random.uniform(-50.0, 50.0, size=(self.num_sheep,2))) \
                                + init_sheep_pose[None,:]
         else:
-            init_sheep_pose = np.random.uniform(-200.0,200.0,size=(2))
-            self.sheep_poses = (np.random.uniform(-40.0,40.0, size=(self.num_sheep,2))) \
-                               + init_sheep_pose[None,:]
+            init_sheep_pose = np.random.uniform(-self.init_sheep_root, 
+                                                self.init_sheep_root, size=(2))
+            self.sheep_poses = (np.random.uniform(-self.init_sheep_range, 
+                                self.init_sheep_range, size=(self.num_sheep,2))) \
+                                + init_sheep_pose[None,:]
         self.sheep_com = self.sheep_poses.mean(axis=0)
 
         # get the farthest sheep and radius of the sheep
@@ -204,7 +211,8 @@ class ShepherdEnv(gym.Env):
             init_dog_pose = np.array([0.0,75.0])
         else:
             init_theta = np.random.uniform(-np.pi,np.pi)
-            init_dog_pose = init_sheep_pose + 40.0*np.array([np.cos(init_theta),np.sin(init_theta)])
+            init_dog_pose = init_sheep_pose + self.init_dog_distance*np.array([np.cos(init_theta), 
+                                                np.sin(init_theta)])
         self.dog_pose = init_dog_pose
 
         # initialize inertia

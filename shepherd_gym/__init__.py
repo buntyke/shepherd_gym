@@ -1,8 +1,8 @@
 """shepherd_gym - Gym environment implementation of dog shepherding task"""
 
+import shepherd_gym.models
 from gym.envs.registration import register
 from shepherd_gym.shepherd_sim import ShepherdSim
-from shepherd_gym.models.dog_heuristic import dog_heuristic_model
 
 register(
     id='Shepherd-v0',
