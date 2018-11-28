@@ -6,21 +6,6 @@ shepherd_gym
 
 Gym environment implementation of dog shepherding task
 
-Simulations
------------
-
-Heuristic model simulation (generated using matplotlib):
-
-![heuristic model simulation](images/heuristic.gif)
-
-Rewards for heuristic model (rewards keep increasing):
-
-![heuristic model rewards](images/heuristic_rewards.png)
-
-Rewards for random model (rewards remain low):
-
-![random model rewards](images/random_rewards.png)
-
 Installation
 ------------
 
@@ -34,7 +19,6 @@ Installation
   ```
   $ pip install -e .
   ```
-
 
 Usage
 -----
@@ -91,6 +75,21 @@ Follow the following sequence to experiment with imitation learning
   $ python examples/shepherd_imitation.py -e heuristic -m test
   ```
   This should render the environment window showing performance of IL agent.
+
+Simulations
+-----------
+
+Heuristic model simulation (generated using matplotlib):
+
+![heuristic model simulation](images/heuristic.gif)
+
+Rewards for heuristic model (rewards keep increasing):
+
+![heuristic model rewards](images/heuristic_rewards.png)
+
+Rewards for random model (rewards remain low):
+
+![random model rewards](images/random_rewards.png)
 
 Requirements
 ------------
