@@ -1,6 +1,7 @@
 """shepherd_gym - Gym environment implementation of dog shepherding task"""
 
 import shepherd_gym.models
+import shepherd_gym.wrappers
 from gym.envs.registration import register
 from shepherd_gym.shepherd_sim import ShepherdSim
 
