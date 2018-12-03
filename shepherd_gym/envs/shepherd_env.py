@@ -227,6 +227,60 @@ class ShepherdEnv(gym.Env):
         
         return state
 
+    def reset_from_state(self, state):
+        """
+        Reset the environment from given state
+
+        Returns
+        -------
+        observation (float array) : initial observation after reset.
+        """
+
+        # initialize gym env variables
+        self.finish = False
+        self.curr_step = -1
+        self.curr_episode += 1
+
+        # initialize target position
+        self.target = state[4:6]
+
+        # initialize sheep com
+        self.sheep_com = state[0:2]
+
+        # get the farthest sheep and radius of the sheep
+        self.farthest_sheep = state[2:4]
+        self.radius_sheep = np.array([state[7]])
+
+        # update distance to target
+        self.target_distance = np.array([state[8]])
+
+        # initialize sheep position
+        self.sheep_poses = (np.random.uniform(-0.75*self.radius_sheep, 
+                            0.75*self.radius_sheep, size=(self.num_sheep,2))) \
+                            + self.sheep_com[None,:]
+        rnd_ind = np.random.choice(self.num_sheep)
+        self.sheep_poses[rnd_ind,:] = state[2:4]
+
+        # initialize values for reward estimation
+        self.init_radius_sheep = self.radius_sheep
+        self.init_target_distance = self.target_distance
+
+        # initialize dog position
+        init_dog_pose = state[6:8]
+        self.dog_pose = init_dog_pose
+
+        # initialize inertia
+        self.inertia = np.ones((self.num_sheep, 2))
+
+        # initialize episode reward and length
+        self.episode_reward = 0
+        self.episode_length = 0
+
+        # get the state, reward, finish, info
+        state = self._get_state()
+        
+        return state
+
     def close(self):
         """Clean exit for environment"""
 
