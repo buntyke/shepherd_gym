@@ -32,7 +32,8 @@ def main():
 
     env = gym.make(env_name)
     env = shepherd_gym.wrappers.SamplerWrapper(env,
-                demo_path='../data/heuristic')
+                    demo_path='../data/heuristic', 
+                    increment_freq=250)
     env = DummyVecEnv([lambda: env])
 
     if policy=='mlp':

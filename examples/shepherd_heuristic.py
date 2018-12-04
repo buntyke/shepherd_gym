@@ -33,7 +33,8 @@ def main():
     parser.add_argument('--store', action='store_true', default=False, help='flag to store experience')
     parser.add_argument('--noplot', dest='plot', action='store_false', default=True, help='flag to plot rewards')
     parser.add_argument('--norender', dest='render', action='store_false', default=True, help='flag for rendering sim')
-	
+    parser.add_argument('--wrap', dest='wrap', action='store_true', default=False, help='flag to wrap sampler')
+
     # parse arguments and assign variables
     args = parser.parse_args()
 
@@ -60,6 +61,11 @@ def main():
 
     # create the environment
     shepherd_env = gym.make('Shepherd-v0')
+    if args.wrap:
+        shepherd_env = shepherd_gym.wrappers.SamplerWrapper(shepherd_env,
+                        demo_path='../data/curriculum',
+                        increment_freq=2, initial_window_width=5,
+                        window_increment=5)
     shepherd_env.seed(seed)
     shepherd_env.print_info = True
 
@@ -74,7 +80,8 @@ def main():
     dataset = []
     n_samples = []
 
-    for n in range(n_trials):
+    n = 0
+    while n < n_trials:
 
         # initialize trial data variable
         trial_data = np.zeros((0,2*n_state+5))
@@ -104,16 +111,17 @@ def main():
             state = new_state
 
         # check for failure
-        if trial_data[-1,n_state+4] == -10.0:
+        if trial_data.shape[0] == 0 or shepherd_env.target_distance>1.0:
             print('Fail!')
-
-        # append to the dataset
-        dataset.append(trial_data)
-        n_samples.append(trial_data.shape[0])
+        else:
+            # else append to the dataset
+            n += 1
+            dataset.append(trial_data)
+            n_samples.append(trial_data.shape[0])
 
         # information
         print(f'Finish simulation: {n+1}')
-    
+
     # stop the simulations
     shepherd_env.close()
 
