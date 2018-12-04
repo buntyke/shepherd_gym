@@ -15,3 +15,9 @@ register(
     entry_point='shepherd_gym.envs:ShepherdEnv',
     kwargs={'fixed_reset' : True, 'info_mode' : 1}
 )
+
+register(
+    id='Shepherd-v2',
+    entry_point='shepherd_gym.envs:ShepherdEnv',
+    kwargs={'sparse_reward' : True}
+)

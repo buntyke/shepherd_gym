@@ -42,7 +42,8 @@ class ShepherdEnv(gym.Env):
     2) Negative of com distance to target (d_t)
     """
 
-    def __init__(self, num_sheep=25, info_mode=0, fixed_reset=False):
+    def __init__(self, num_sheep=25, info_mode=0, 
+                 fixed_reset=False, sparse_reward=False):
         
         # initialize observation space
         obs_low = np.array(10*[-1000.0])
@@ -58,7 +59,7 @@ class ShepherdEnv(gym.Env):
         # conditions to terminate
         self.boundary = 400.0
         self.max_radius = 100.0
-        self.max_distance = 300.0
+        self.max_distance = 400.0
 
         # create buffer and episode variable
         self.curr_step = -1
@@ -96,6 +97,9 @@ class ShepherdEnv(gym.Env):
         self.episode_length = 0.0
         self.episode_reward = 0.0
 
+        # flag for sparse reward
+        self.sparse_reward = sparse_reward
+
     def step(self, action):
         """
         The dog takes a step in the environment
@@ -122,17 +126,27 @@ class ShepherdEnv(gym.Env):
         self._take_action(action)
         self._take_action(action)
 
+        # initialize reward and get state 
+        reward = 0.0
         ob = self._get_state()
 
-        if self.curr_step >= self.max_steps or self.target_distance >= self.max_distance \
-           or self.mean_radius_sheep >= self.max_radius:
-            reward = np.array([-10.0])
-            self.finish = True
-        elif self.target_distance <= 1.0:
-            reward = np.array([10.0])
-            self.finish = True
-        else:
+        # give dense rewards 
+        if not self.sparse_reward:
             reward = self._get_reward()
+
+        # bad terminal conditions
+        if self.curr_step >= self.max_steps \
+          or self.target_distance >= self.max_distance \
+          or self.mean_radius_sheep >= self.max_radius:
+            self.finish = True
+            if self.sparse_reward:
+                reward = -1.0
+
+        # good terminal conditions
+        if self.target_distance <= 1.0:
+            self.finish = True
+            if self.sparse_reward:
+                reward = 1.0
 
         # update rl parameters
         self.episode_length += 1
@@ -249,10 +263,10 @@ class ShepherdEnv(gym.Env):
 
         # get the farthest sheep and radius of the sheep
         self.farthest_sheep = state[2:4]
-        self.radius_sheep = np.array([state[7]])
+        self.radius_sheep = np.array([state[8]])
 
         # update distance to target
-        self.target_distance = np.array([state[8]])
+        self.target_distance = np.array([state[9]])
 
         # initialize sheep position
         self.sheep_poses = (np.random.uniform(-0.75*self.radius_sheep, 
@@ -398,10 +412,10 @@ class ShepherdEnv(gym.Env):
         """Return reward based on action of the dog"""
 
         # compute reward depending on the radius and distance to target
-        radius_reward = -(self.radius_sheep*0.9)/self.init_radius_sheep
-        target_reward = -(self.target_distance*0.9)/self.init_target_distance 
+        radius_reward = -(self.radius_sheep*0.9)/self.init_sheep_root
+        target_reward = -(self.target_distance*0.9)/self.init_sheep_root
 
-        reward = 1.0 + (max(-1.0,target_reward) + max(-1.0,radius_reward))/2.0
+        reward = target_reward + radius_reward
 
         # ensure it is always an array
         if not type(reward) is np.ndarray:
