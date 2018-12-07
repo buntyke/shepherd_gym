@@ -22,18 +22,26 @@ from shepherd_gym.models.dog_heuristic import dog_heuristic_model
 
 def main():
     # setup argument parser
-    parser = argparse.ArgumentParser(description='Test heuristic model with shepherd env')
+    parser = argparse.ArgumentParser(description='Heuristic model with shepherd')
 
-    parser.add_argument('-e' ,'--experiment', default='heuristic', type=str, help='name of the experiment')
-    parser.add_argument('-m', '--model', default='heuristic', type=str, help='name of model to use')
+    parser.add_argument('-e' , '--experiment', default='heuristic', type=str, 
+                        help='name of the experiment')
+    parser.add_argument('-m',  '--model', default='heuristic', type=str, 
+                        help='model to use: heuristic, random')
 
-    parser.add_argument('-n', '--ntrials', default=5, type=int, help='number of episodes')
-    parser.add_argument('-s', '--seed', default=41, type=int, help='seed value for reproducibility')
+    parser.add_argument('-n', '--ntrials', default=5, type=int, 
+                        help='number of episodes')
+    parser.add_argument('-s', '--seed', default=41, type=int, 
+                        help='seed value for reproducibility')
 
-    parser.add_argument('--store', action='store_true', default=False, help='flag to store experience')
-    parser.add_argument('--noplot', dest='plot', action='store_false', default=True, help='flag to plot rewards')
-    parser.add_argument('--norender', dest='render', action='store_false', default=True, help='flag for rendering sim')
-    parser.add_argument('--wrap', dest='wrap', action='store_true', default=False, help='flag to wrap sampler')
+    parser.add_argument('--store', action='store_true', default=False, 
+                        help='flag to store experience')
+    parser.add_argument('--noplot', dest='plot', action='store_false', 
+                        default=True, help='flag to plot rewards')
+    parser.add_argument('--norender', dest='render', action='store_false', 
+                        default=True, help='flag for rendering sim')
+    parser.add_argument('--wrap', dest='wrap', action='store_true', 
+                        default=False, help='flag to wrap sampler')
 
     # parse arguments and assign variables
     args = parser.parse_args()
@@ -104,7 +112,8 @@ def main():
             (new_state, reward, finish, info) = shepherd_env.step(action)
 
             # append to variable
-            sample = np.hstack((state,int_goal,np.array([dog_mode,action,reward]),new_state))
+            sample = np.hstack((state,int_goal,
+                            np.array([dog_mode,action,reward]),new_state))
             trial_data = np.vstack((trial_data,sample[None,:]))
 
             # update state
@@ -138,7 +147,8 @@ def main():
         for n in range(n_trials):
             if n%4 == 0:
                 x_data = np.arange(n_samples[n])
-                plt.plot(x_data,dataset[n][:,n_state+4],'-',linewidth=2,label=f'Ep {n+1}')
+                plt.plot(x_data, dataset[n][:,n_state+4],'-', 
+                         linewidth=2, label=f'Ep {n+1}')
         
         plt.xlabel('# steps')
         plt.ylabel('reward r(t)')

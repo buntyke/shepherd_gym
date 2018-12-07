@@ -13,7 +13,8 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader, Dataset
 
 # import utility classes
-from shepherd_gym.models.imitation_utils import DemoDataset, RandomSampler, Policy, Trainer
+from shepherd_gym.models.imitation_utils import DemoDataset, RandomSampler, \
+        Policy, Trainer
 
 def main():
 
@@ -113,10 +114,12 @@ def main():
 
         sampler = RandomSampler(train_dataset)
         if is_cuda:
-            train_loader = DataLoader(train_dataset, batch_size=64, shuffle=False, sampler=sampler)
+            train_loader = DataLoader(train_dataset, batch_size=64, 
+                                      shuffle=False, sampler=sampler)
             test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
         else:
-            train_loader = DataLoader(train_dataset, batch_size=64, shuffle=False, sampler=sampler)
+            train_loader = DataLoader(train_dataset, batch_size=64, 
+                                      shuffle=False, sampler=sampler)
             test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
         
         print('### Data Loaded ###')

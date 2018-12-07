@@ -39,10 +39,11 @@ def main():
     for n in range(n_episodes):
         tmp = np.loadtxt(f'{data_path}/trial{n+1}',delimiter=',')
         dataset['lengths'][n] = tmp.shape[0]
-        dataset['state'] = np.vstack((dataset['state'],tmp[:,:n_state]))
-        dataset['mode'] = np.vstack((dataset['mode'],tmp[:,n_state+2][:,None]))
-        dataset['goal'] = np.vstack((dataset['goal'],tmp[:,n_state:n_state+2]))
-        dataset['action'] = np.vstack((dataset['action'],tmp[:,n_state+3][:,None]))
+        dataset['state'] = np.vstack((dataset['state'], tmp[:,:n_state]))
+        dataset['mode'] = np.vstack((dataset['mode'], tmp[:,n_state+2][:,None]))
+        dataset['goal'] = np.vstack((dataset['goal'], tmp[:,n_state:n_state+2]))
+        dataset['action'] = np.vstack((dataset['action'], 
+                                       tmp[:,n_state+3][:,None]))
 
     # get stats
     print(dataset['state'].shape, dataset['action'].shape,

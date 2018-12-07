@@ -24,7 +24,8 @@ import matplotlib.pyplot as plt
 class ShepherdEnv(gym.Env):
     """
     Define the shepherding environment.
-    The environment treats the dog as the agent and the sheep as a part of the environment.
+    The environment treats the dog as the agent 
+    and the sheep as a part of the environment.
 
     State: 
     1) Position of center of mass (x,y)
@@ -48,7 +49,8 @@ class ShepherdEnv(gym.Env):
         # initialize observation space
         obs_low = np.array(10*[-1000.0])
         obs_high = np.array(10*[1000.0])
-        self.observation_space = spaces.Box(low=obs_low, high=obs_high, dtype=np.float32)
+        self.observation_space = spaces.Box(low=obs_low, high=obs_high, 
+                                            dtype=np.float32)
 
         # initialize action space
         self.action_space = spaces.Discrete(8)
@@ -163,11 +165,15 @@ class ShepherdEnv(gym.Env):
             plt.clf()
             
             theta = np.linspace(0.0,2*np.pi, num=100)
-            plt.plot(self.boundary*np.cos(theta),self.boundary*np.sin(theta),'-k',linewidth=3)
+            plt.plot(self.boundary*np.cos(theta), self.boundary*np.sin(theta), 
+                     '-k', linewidth=3)
             
-            plt.scatter(self.target[0], self.target[1], c='g', s=40, label='Goal')
-            plt.scatter(self.dog_pose[0], self.dog_pose[1], c='r', s=50, label='Dog')
-            plt.scatter(self.sheep_poses[:,0], self.sheep_poses[:,1], c='b', s=50, label='Sheep')
+            plt.scatter(self.target[0], self.target[1], 
+                        c='g', s=40, label='Goal')
+            plt.scatter(self.dog_pose[0], self.dog_pose[1], 
+                        c='r', s=50, label='Dog')
+            plt.scatter(self.sheep_poses[:,0], self.sheep_poses[:,1], 
+                        c='b', s=50, label='Sheep')
             
             plt.title('Shepherding')
             plt.xlim([-self.boundary,self.boundary])
@@ -198,8 +204,8 @@ class ShepherdEnv(gym.Env):
         # initialize sheep positions
         if self.fixed_reset:
             init_sheep_pose = np.array([75.0, 75.0])
-            self.sheep_poses = (np.random.uniform(-50.0, 50.0, size=(self.num_sheep,2))) \
-                               + init_sheep_pose[None,:]
+            self.sheep_poses = (np.random.uniform(-50.0, 50.0, 
+                                size=(self.num_sheep,2))) + init_sheep_pose[None,:]
         else:
             init_sheep_pose = np.random.uniform(-self.init_sheep_root, 
                                                 self.init_sheep_root, size=(2))

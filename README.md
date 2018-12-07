@@ -50,7 +50,7 @@ Follow the following sequence to experiment with imitation learning
   $ cd examples
   $ python shepherd_heuristic.py -e heuristic -n 1000 --store --norender --noplot
   ```
-  This should create the shepherding data for 1000 trials in the `data` folder.
+  This should create the shepherding data for 1000 trials in the `data/heuristic` folder.
 
 * Preprocess the training dataset into a pickle file:
   ```
@@ -77,6 +77,33 @@ Follow the following sequence to experiment with imitation learning
   $ python shepherd_imitation.py -e heuristic -m test
   ```
   This should render the environment window showing performance of IL agent.
+
+Curriculum Learning
+-------------------
+
+* Generate training dataset using heuristic envrionment:
+  ```
+  $ cd examples
+  $ python shepherd_heuristic.py -e curriculum -n 1000 --store --norender --noplot
+  ```
+  This should create the shepherding data for 1000 trials in the `data/curriculum` folder.
+
+* Generate the curriculum for training dataset:
+  ```
+  $ python dataset_curriculum.py -d ../data/curriculum -n 1000
+  ```
+  This should create a pickle file with processed dataset. All the 
+  trajectories have a fixed length of 100 for uniform sampling.
+
+* Train reinforcement learning model using curriculum wrapper:
+  ```
+  $ python shepherd_curriculum.py -d ../data/curriculum -m train -t 1000000
+  ```
+  This should train a neural network policy using PPO and the 
+  curriculum generated from the pickle file. 
+
+* The performance of curriculum learning is not so good. It is
+  still a work in progress.
 
 Simulations
 -----------

@@ -9,12 +9,10 @@ import numpy as np
 def main():
 
     # setup argument parser
-    parser = argparse.ArgumentParser(description='Preprocessing for curriculum learning')
-    parser.add_argument('-d','--datapath',type=str,
-                        default='../data/heuristic',
+    parser = argparse.ArgumentParser(description='Preprocess for curriculum learning')
+    parser.add_argument('-d','--datapath',type=str, default='../data/heuristic',
                         help='path to dataset')
-    parser.add_argument('-n','--nepisodes',type=int,
-                        default=1000,
+    parser.add_argument('-n','--nepisodes',type=int, default=1000,
                         help='number of episodes to parse')
 
     # parser arguments

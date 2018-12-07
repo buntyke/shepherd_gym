@@ -47,7 +47,8 @@ class RandomSampler(Sampler):
 class Policy(nn.Module):
     """Policy class for behavioral cloning"""
 
-    def __init__(self, n_actions=8, n_goal=2, n_modes=2, n_state=10, drop_rate=0.0):
+    def __init__(self, n_actions=8, n_goal=2, n_modes=2, 
+                 n_state=10, drop_rate=0.0):
         super(Policy, self).__init__()
 
         self.dense1 = nn.Linear(n_state,256)
@@ -111,7 +112,8 @@ class Trainer():
             print(f'#### Epoch {self.epoch} ####')
 
         self.writer.close()
-        torch.save(self.policy.state_dict(), self.result_path+self.experiment+'/model.pt')
+        torch.save(self.policy.state_dict(), 
+                   self.result_path+self.experiment+'/model.pt')
 
     def train(self):
         correct = 0
@@ -132,7 +134,8 @@ class Trainer():
             goal_loss = F.mse_loss(goal, sample['goal'])
             mode_loss = F.cross_entropy(mode, sample['mode'][:,0])
             act_loss = F.cross_entropy(action, sample['action'][:,0])
-            loss = self.loss_weights[0]*act_loss + self.loss_weights[1]*goal_loss \
+            loss = self.loss_weights[0]*act_loss \
+                    + self.loss_weights[1]*goal_loss \
                     + self.loss_weights[2]*mode_loss
 
             # get index of max log-probability
