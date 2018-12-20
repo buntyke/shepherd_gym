@@ -32,9 +32,9 @@ def main():
     timesteps = args.timesteps
     experiment = args.experiment
 
-    exp_path = f'{data_path}/{experiment}'
-    log_path = f'{exp_path}/log_{timesteps}'
-    model_path = f'{exp_path}/model_{timesteps}'
+    exp_path = '{}/{}'.format(data_path,experiment)
+    log_path = '{}/log_{}'.format(exp_path, timesteps)
+    model_path = '{}/model_{}'.format(exp_path, timesteps)
 
     env = gym.make(env_name)
     env = shepherd_gym.wrappers.SamplerWrapper(env,

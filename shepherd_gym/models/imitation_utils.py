@@ -109,7 +109,7 @@ class Trainer():
         for self.epoch in range(1, self.n_epochs+1):
             self.train()
             self.test()
-            print(f'#### Epoch {self.epoch} ####')
+            print('#### Epoch {} ####'.format(self.epoch))
 
         self.writer.close()
         torch.save(self.policy.state_dict(), 

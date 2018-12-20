@@ -17,7 +17,7 @@ class SamplerWrapper(Wrapper):
 
         # load demo dataset
         self.demo_path = demo_path
-        with open(f'{self.demo_path}/curriculum.npz','rb') as f:
+        with open('{}/curriculum.npz'.format(self.demo_path),'rb') as f:
             self.demo_data = pickle.load(f)
 
         # number of trajectories

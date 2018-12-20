@@ -31,7 +31,7 @@ def main():
     min_seq_length = 1000
     store_seq_length = 100
     for n in range(n_episodes):
-        tmp = np.loadtxt(f'{data_path}/trial{n+1}',delimiter=',')
+        tmp = np.loadtxt('{}/trial{}'.format(data_path,n+1),delimiter=',')
         seq_length = tmp.shape[0]
 
         if seq_length >= store_seq_length:
@@ -40,9 +40,9 @@ def main():
 
             if seq_length < min_seq_length:
                 min_seq_length = seq_length
-                print(f'Min: {min_seq_length}')
+                print('Min: {}'.format(min_seq_length))
         else:
-            print(f'Skip: {seq_length}')
+            print('Skip: {}'.format(seq_length))
 
     # trim all sequences
     for n in range(c_id):
@@ -52,7 +52,7 @@ def main():
         dataset[n] = dataset[n][idx,:]
 
     # save dataset to file
-    with open(f'{data_path}/curriculum.npz', 'wb') as f:
+    with open('{}/curriculum.npz'.format(data_path), 'wb') as f:
         pickle.dump(dataset,f)
 
 if __name__ == '__main__':

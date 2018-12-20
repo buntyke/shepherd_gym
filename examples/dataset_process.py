@@ -37,7 +37,7 @@ def main():
 
     # loop over dataset files
     for n in range(n_episodes):
-        tmp = np.loadtxt(f'{data_path}/trial{n+1}',delimiter=',')
+        tmp = np.loadtxt('{}/trial{}'.format(data_path,n+1),delimiter=',')
         dataset['lengths'][n] = tmp.shape[0]
         dataset['state'] = np.vstack((dataset['state'], tmp[:,:n_state]))
         dataset['mode'] = np.vstack((dataset['mode'], tmp[:,n_state+2][:,None]))
@@ -56,7 +56,7 @@ def main():
     print(dataset['n_train'],dataset['n_test'],dataset['state'].shape[0])
 
     # save dataset to file
-    np.savez(f'{data_path}/dataset.npz', state=dataset['state'],
+    np.savez('{}/dataset.npz'.format(data_path), state=dataset['state'],
              action=dataset['action'], goal=dataset['goal'], 
              mode=dataset['mode'], n_test=dataset['n_test'],
              n_train=dataset['n_train'])

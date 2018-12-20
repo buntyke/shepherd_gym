@@ -28,6 +28,8 @@ def main():
                         help='name of the experiment')
     parser.add_argument('-m',  '--model', default='heuristic', type=str, 
                         help='model to use: heuristic, random')
+    parser.add_argument('-c', '--continuous', default=False, action='store_true',
+                        help='flag to create continuous action env')
 
     parser.add_argument('-n', '--ntrials', default=5, type=int, 
                         help='number of episodes')
@@ -61,14 +63,19 @@ def main():
         data_path = '../data'
         if not os.path.isdir(data_path):
             os.mkdir(data_path)
-        
-        exp_path = f'{data_path}/{exp_name}'
+
+        exp_path = '{}/{}'.format(data_path, exp_name)
         if os.path.isdir(exp_path):
             shutil.rmtree(exp_path, ignore_errors=True)
         os.mkdir(exp_path)
 
     # create the environment
-    shepherd_env = gym.make('Shepherd-v0')
+    if args.continuous:
+        env_name = 'ShepherdCont-v0'
+    else:
+        env_name = 'Shepherd-v0'
+
+    shepherd_env = gym.make(env_name)
     if args.wrap:
         shepherd_env = shepherd_gym.wrappers.SamplerWrapper(shepherd_env,
                         demo_path='../data/curriculum',
@@ -102,7 +109,8 @@ def main():
         while not finish:
             # get the dog's action
             if model == 'heuristic':
-                action, int_goal, dog_mode = dog_heuristic_model(state, info)
+                action, int_goal, dog_mode = dog_heuristic_model(state, info, 
+                                                                 args.continuous)
             else:
                 dog_mode = -1.0
                 int_goal = np.array([0.0,0.0])
@@ -129,7 +137,7 @@ def main():
             n_samples.append(trial_data.shape[0])
 
         # information
-        print(f'Finish simulation: {n+1}')
+        print('Finish simulation: {}'.format(n))
 
     # stop the simulations
     shepherd_env.close()
@@ -137,7 +145,7 @@ def main():
     # store experience to files
     if store_dataset:
         for n in range(n_trials):
-            np.savetxt(f'{exp_path}/trial{n+1}', dataset[n], 
+            np.savetxt('{}/trial{}'.format(exp_path,n+1), dataset[n], 
                        fmt='%.3f', delimiter=',')
 
     # plot the generated rewards
@@ -148,15 +156,15 @@ def main():
             if n%4 == 0:
                 x_data = np.arange(n_samples[n])
                 plt.plot(x_data, dataset[n][:,n_state+4],'-', 
-                         linewidth=2, label=f'Ep {n+1}')
+                         linewidth=2, label='Ep {}'.format(n+1))
         
         plt.xlabel('# steps')
         plt.ylabel('reward r(t)')
-        plt.title(f'{model} model')
+        plt.title('{} model'.format(model))
         plt.legend(bbox_to_anchor=(1.2, 1.0))
 
         plt.tight_layout()
-        plt.savefig(f'{exp_path}/rewards.png')
+        plt.savefig('{}/rewards.png'.format(exp_path))
 
         plt.show()
 

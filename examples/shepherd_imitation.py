@@ -85,7 +85,7 @@ def main():
 
     if mode == 'train':
         # load the dataset
-        dataset_file = f'{data_path}/dataset.npz'
+        dataset_file = '{}/dataset.npz'.format(data_path)
 
         with np.load(dataset_file) as dataset:
             n_test = dataset['n_test']
