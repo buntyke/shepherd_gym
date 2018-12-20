@@ -26,15 +26,6 @@ setup(
 
     packages=find_packages(exclude=('tests','examples','imitation')),
 
-    install_requires=['gym>=0.10.5',
-                      'torch>=0.4.1',
-                      'numpy>=1.15.0',
-                      'tensorboardX>=1.4',
-                      'matplotlib>=2.2.2',
-                      'torchvision>=0.2.1',
-                      'stable-baselines>=2.2.1',
-                      'ipython>=7.1.1'],
-
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'License :: OSI Approved :: MIT License',

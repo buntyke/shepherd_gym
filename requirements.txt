@@ -1,0 +1,8 @@
+gym>=0.10.5
+torch>=0.4.1
+numpy>=1.15.0
+tensorboardX>=1.4
+matplotlib>=2.2.2
+torchvision>=0.2.1
+stable-baselines>=2.2.1
+ipython>=7.1.1
