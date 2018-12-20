@@ -10,7 +10,7 @@ The dog switches between two behaviors of collecting and herding.
 # core modules
 import numpy as np
 
-def dog_heuristic_model(state, info):
+def dog_heuristic_model(state, info, continuous=False):
 
     # initialize dog collect radius
     dog_collect_radius = 2.0
@@ -68,9 +68,13 @@ def dog_heuristic_model(state, info):
     direction /= np.linalg.norm(direction)
 
     # discretize actions
-    theta = np.arctan2(direction[1], direction[0])*180/np.pi
+    theta = np.arctan2(direction[1], direction[0])
+
+    if continuous:
+        return theta, int_goal, dog_mode
 
     action = 8
+    theta *= 180/np.pi
     if theta <= 22.5 and theta >= -22.5:
         action = 0
     elif theta <= 67.5 and theta > 22.5:

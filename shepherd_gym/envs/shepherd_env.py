@@ -43,7 +43,7 @@ class ShepherdEnv(gym.Env):
     2) Negative of com distance to target (d_t)
     """
 
-    def __init__(self, num_sheep=25, info_mode=0, 
+    def __init__(self, continuous=False, num_sheep=25, info_mode=0, 
                  fixed_reset=False, sparse_reward=False):
         
         # initialize observation space
@@ -52,8 +52,17 @@ class ShepherdEnv(gym.Env):
         self.observation_space = spaces.Box(low=obs_low, high=obs_high, 
                                             dtype=np.float32)
 
+        # setup environment type
+        self.continuous = continuous
+
         # initialize action space
-        self.action_space = spaces.Discrete(8)
+        if self.continuous:
+            act_low = np.array([-np.pi])
+            act_high = np.array([np.pi])
+            self.action_space = spaces.Box(low=act_low, high=act_high,
+                                            dtype=np.float32)
+        else:
+            self.action_space = spaces.Discrete(8)
 
         # limit episode length
         self.max_steps = 500
@@ -317,30 +326,33 @@ class ShepherdEnv(gym.Env):
     def _take_action(self, action):
         """Update position of dog based on action and env"""
 
-        increment = np.array([0.0,0.0])
-        if action == 0:
-            increment[0] = 1.5
-        elif action == 1:
-            increment[0] = 1.225
-            increment[1] = 1.225
-        elif action == 2:
-            increment[1] = 1.5
-        elif action == 3:
-            increment[0] = -1.225
-            increment[1] = 1.225
-        elif action == 4:
-            increment[0] = -1.5
-        elif action == 5:
-            increment[0] = -1.225
-            increment[1] = -1.225
-        elif action == 6:
-            increment[1] = -1.5
-        elif action == 7:
-            increment[0] = 1.225
-            increment[1] = -1.225
+        if self.continuous:
+            increment = np.array([1.5*np.cos(action),1.5*np.sin(action)])
         else:
-            print('NOP!')
-        
+            increment = np.array([0.0,0.0])
+            if action == 0:
+                increment[0] = 1.5
+            elif action == 1:
+                increment[0] = 1.225
+                increment[1] = 1.225
+            elif action == 2:
+                increment[1] = 1.5
+            elif action == 3:
+                increment[0] = -1.225
+                increment[1] = 1.225
+            elif action == 4:
+                increment[0] = -1.5
+            elif action == 5:
+                increment[0] = -1.225
+                increment[1] = -1.225
+            elif action == 6:
+                increment[1] = -1.5
+            elif action == 7:
+                increment[0] = 1.225
+                increment[1] = -1.225
+            else:
+                print('NOP!')
+
         self.dog_pose += increment
         self._update_environment()
 

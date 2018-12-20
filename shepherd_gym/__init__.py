@@ -21,3 +21,9 @@ register(
     entry_point='shepherd_gym.envs:ShepherdEnv',
     kwargs={'sparse_reward' : True}
 )
+
+register(
+    id='ShepherdCont-v0',
+    entry_point='shepherd_gym.envs:ShepherdEnv',
+    kwargs={'continuous' : True}
+)
