@@ -49,8 +49,7 @@ class ShepherdEnv(gym.Env):
         # initialize observation space
         obs_low = np.array(10*[-1000.0])
         obs_high = np.array(10*[1000.0])
-        self.observation_space = spaces.Box(low=obs_low, high=obs_high, 
-                                            dtype=np.float32)
+        self.observation_space = spaces.Box(low=obs_low, high=obs_high)
 
         # setup environment type
         self.continuous = continuous
@@ -59,8 +58,7 @@ class ShepherdEnv(gym.Env):
         if self.continuous:
             act_low = np.array([-np.pi])
             act_high = np.array([np.pi])
-            self.action_space = spaces.Box(low=act_low, high=act_high,
-                                            dtype=np.float32)
+            self.action_space = spaces.Box(low=act_low, high=act_high)
         else:
             self.action_space = spaces.Discrete(8)
 
@@ -325,6 +323,9 @@ class ShepherdEnv(gym.Env):
 
     def _take_action(self, action):
         """Update position of dog based on action and env"""
+
+        if isinstance(action, list) or isinstance(action, np.ndarray):
+            action = action[0]
 
         if self.continuous:
             increment = np.array([1.5*np.cos(action),1.5*np.sin(action)])
