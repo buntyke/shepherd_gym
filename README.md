@@ -15,6 +15,11 @@ Installation
   $ sudo apt install -y cmake libopenmpi-dev python3-dev zlib1g-dev
   ```
 
+* Install machine learning dependencies for examples folder:
+  ```
+  $ pip install -r requirements.txt
+  ```
+
 * The library can be installed by running:
   ```
   $ pip install -e .
