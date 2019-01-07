@@ -26,6 +26,11 @@ setup(
 
     packages=find_packages(exclude=('tests','examples','imitation')),
 
+    install_requires=['gym>=0.10.5',
+                      'numpy>=1.15.0',
+                      'ipython>=7.1.1',
+                      'matplotlib>=2.2.2'],
+
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'License :: OSI Approved :: MIT License',

@@ -33,7 +33,7 @@ class Environments(unittest.TestCase):
 
         (state,_,finish,info) = env.step(0)
         while not finish:
-            action = shepherd_gym.dog_heuristic_model(state,info)
+            action = shepherd_gym.models.dog_heuristic_model(state,info)
             (state,_,finish,info) = env.step(action)
 
     def test_sim(self):
