@@ -98,7 +98,6 @@ class ShepherdEnv(gym.Env):
         self.num_sheep = num_sheep
 
         # flag to show simulation, false by default
-        self.show_sim = False
         self.info_mode = info_mode
         self.fixed_reset = fixed_reset
 
@@ -108,6 +107,9 @@ class ShepherdEnv(gym.Env):
 
         # flag for sparse reward
         self.sparse_reward = sparse_reward
+
+        # initialize plot figure
+        self.fig = None
 
     def step(self, action):
         """
@@ -130,6 +132,7 @@ class ShepherdEnv(gym.Env):
                 useful information about the environment for debugging.
         """
         
+        success = False
         self.curr_step += 1
         self._take_action(action)
         self._take_action(action)
@@ -153,6 +156,7 @@ class ShepherdEnv(gym.Env):
 
         # good terminal conditions
         if self.target_distance <= 1.0:
+            success = True
             self.finish = True
             if self.sparse_reward:
                 reward = 1.0
@@ -163,31 +167,10 @@ class ShepherdEnv(gym.Env):
 
         # generate info return parameter
         if self.info_mode == 1 and self.finish:
-            info = {'r':self.episode_reward, 'l':self.episode_length}
+            info = {'r':self.episode_reward, 'l':self.episode_length, 
+                    's': success}
         else:
-            info = {'n':self.num_sheep}
-
-        # render environment
-        if self.show_sim and self.curr_step%5 == 0:
-            plt.clf()
-            
-            theta = np.linspace(0.0,2*np.pi, num=100)
-            plt.plot(self.boundary*np.cos(theta), self.boundary*np.sin(theta), 
-                     '-k', linewidth=3)
-            
-            plt.scatter(self.target[0], self.target[1], 
-                        c='g', s=40, label='Goal')
-            plt.scatter(self.dog_pose[0], self.dog_pose[1], 
-                        c='r', s=50, label='Dog')
-            plt.scatter(self.sheep_poses[:,0], self.sheep_poses[:,1], 
-                        c='b', s=50, label='Sheep')
-            
-            plt.title('Shepherding')
-            plt.xlim([-self.boundary,self.boundary])
-            plt.ylim([-self.boundary,self.boundary])
-            plt.legend()
-            plt.draw()
-            plt.pause(0.01)
+            info = {'n':self.num_sheep, 's': success}
 
         return ob, reward, self.finish, info
 
@@ -311,7 +294,7 @@ class ShepherdEnv(gym.Env):
     def close(self):
         """Clean exit for environment"""
 
-        if self.show_sim:
+        if self.fig:
             plt.close('all')
             plt.ioff()
 
@@ -450,15 +433,37 @@ class ShepherdEnv(gym.Env):
                     self.target_distance))
         return state
 
-    def render(self, mode='human', close=False):
+    def render(self, mode='default', subgoal=None):
 
-        if mode == 'human':
-            # create a figure
-            self.fig = plt.figure()
-            plt.ion()
-            plt.show()
+        if self.curr_step%5 == 0:
+            if not self.fig:
+                # create a figure
+                self.fig = plt.figure()
+                plt.ion()
+                plt.show()
 
-            # set the flag for plotting
-            self.show_sim = True
+            plt.clf()
+
+            theta = np.linspace(0.0,2*np.pi, num=100)
+            plt.plot(self.boundary*np.cos(theta), self.boundary*np.sin(theta), 
+                     '-k', linewidth=3)
+
+            plt.scatter(self.target[0], self.target[1], 
+                        c='g', s=40, label='Goal')
+            plt.scatter(self.dog_pose[0], self.dog_pose[1], 
+                        c='r', s=50, label='Dog')
+            plt.scatter(self.sheep_poses[:,0], self.sheep_poses[:,1], 
+                        c='b', s=50, label='Sheep')
+
+            if mode == 'detailed':
+                plt.scatter(subgoal[0], subgoal[1], 
+                            c='m', s=75, label='Int Goal')
+
+            plt.title('Shepherding')
+            plt.xlim([-self.boundary,self.boundary])
+            plt.ylim([-self.boundary,self.boundary])
+            plt.legend()
+            plt.draw()
+            plt.pause(0.01)
 
         return

@@ -61,6 +61,10 @@ def main():
     for _ in range(1000):
         action, _states = model.predict(obs)
         obs, _, _, _ = env.step(action)
+        env.render()
+
+    # complete simulation
+    env.close()
 
 if __name__=='__main__':
     main()

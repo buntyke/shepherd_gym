@@ -119,6 +119,10 @@ def main():
             # execute the action and update the state
             (new_state, reward, finish, info) = shepherd_env.step(action)
 
+            # render the simulation
+            if render_sim:
+                shepherd_env.render(mode='detailed',subgoal=int_goal)
+
             # append to variable
             sample = np.hstack((state,int_goal,
                             np.array([dog_mode,action,reward]),new_state))
