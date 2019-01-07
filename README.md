@@ -76,10 +76,14 @@ Follow the following sequence to experiment with imitation learning
   ```
   Open a webbrowser and check the URL: `localhost:6006`.
 
+* Check training performance of model:
+  ```
+  $ python shepherd_imitation.py -e heuristic -m eval 
+
 * Test performance of imitation learning model:
   ```
   $ cd examples
-  $ python shepherd_imitation.py -e heuristic -m test
+  $ python shepherd_imitation.py -e heuristic -m test --display
   ```
   This should render the environment window showing performance of IL agent.
 
