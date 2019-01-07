@@ -16,6 +16,9 @@ from torch.utils.data import DataLoader, Dataset
 from shepherd_gym.models.imitation_utils import DemoDataset, RandomSampler, \
         Policy, Trainer
 
+# IPython debugging
+from IPython.terminal.debugger import set_trace as keyboard
+
 def main():
 
     # setup argument parsing
@@ -83,7 +86,7 @@ def main():
     print('Experiment: ',experiment)
     print('### Initialization Done ###')
 
-    if mode == 'train':
+    if mode in ['train', 'eval']:
         # load the dataset
         dataset_file = '{}/dataset.npz'.format(data_path)
 
@@ -116,12 +119,14 @@ def main():
         if is_cuda:
             train_loader = DataLoader(train_dataset, batch_size=64, 
                                       shuffle=False, sampler=sampler)
-            test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+            test_loader = DataLoader(test_dataset, batch_size=64, 
+                                     shuffle=False)
         else:
             train_loader = DataLoader(train_dataset, batch_size=64, 
                                       shuffle=False, sampler=sampler)
-            test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
-        
+            test_loader = DataLoader(test_dataset, batch_size=64, 
+                                     shuffle=False)
+
         print('### Data Loaded ###')
 
     # define network and optimizer
@@ -129,7 +134,7 @@ def main():
     if is_cuda:
         policy.cuda()
 
-    if mode == 'train':
+    if mode in ['train','eval']:
         optimizer = optim.Adam(policy.parameters(), lr=learn_rate)
 
     print('### Network Created ###')
@@ -139,42 +144,63 @@ def main():
         trainer = Trainer(experiment, policy, train_loader, test_loader, 
                           optimizer, n_epochs=n_epochs, is_cuda=is_cuda, 
                           loss_weights=loss_weights, result_path=result_path)
-        trainer.run()
+        output = trainer.run()
         print('### Training Completed ###')
-
-    # create new environment
-    env = gym.make(args.env)
-    if args.display:
-        env.render()
 
     # load trained model
     policy.load_state_dict(torch.load(result_path+experiment+'/model.pt'))
     policy.eval()
 
-    # loop over episodes
-    for _ in range(n_episodes):
-        done = False
-        state = env.reset()
-        
-        # run until episode terminates
-        while not done:
-            state_var = torch.from_numpy(state[None,:].astype(np.float32))
+    if mode == 'eval':
+        # define trainer class and run test function
+        trainer = Trainer(experiment, policy, train_loader, test_loader, 
+                          optimizer, n_epochs=n_epochs, is_cuda=is_cuda, 
+                          loss_weights=loss_weights, result_path=result_path)
+        output = trainer.plot()
+        print('### Evaluation Completed ###')
 
-            if is_cuda:
-                state_var = state_var.cuda()    
-            state_var = Variable(state_var)
+    if mode == 'test':
+        # create new environment
+        env = gym.make(args.env)
+        if args.display:
+            env.render()
+
+        # loop over episodes
+        success_trials = 0
+        for _ in range(n_episodes):
+            done = False
+            state = env.reset()
             
-            # get output action
-            output,_,_ = policy(state_var)
-            pred = F.softmax(output, dim=1).data.max(1, keepdim=True)[1]
-            action = pred.cpu().numpy()
+            # run until episode terminates
+            while not done:
+                state_var = torch.from_numpy(state[None,:].astype(np.float32))
 
-            # perform action and get state
-            state,_,done,_ = env.step(action)
+                if is_cuda:
+                    state_var = state_var.cuda()
+                state_var = Variable(state_var)
 
-    # shutdown env
-    env.close()
-    print('### Testing Completed ###')
+                # get output action
+                output,int_goal,_ = policy(state_var)
+                pred = F.softmax(output, dim=1).data.max(1, keepdim=True)[1]
+                action = pred.cpu().numpy()
+
+                # perform action and get state
+                state, _, done, info = env.step(action)
+
+                # check for success
+                if done and info['s']:
+                    print('Success!')
+                    success_trials += 1.0
+
+                # render simulation 
+                if args.display:
+                    subgoal = int_goal.detach().cpu().numpy()[0]
+                    env.render(mode='detailed',subgoal=subgoal)
+
+        # shutdown env
+        env.close()
+        print('### Testing Completed ###')
+        print(f'Sucess Rate: {success_trials/n_episodes}')
 
 if __name__=='__main__':
     main()

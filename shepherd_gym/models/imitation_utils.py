@@ -1,5 +1,6 @@
 # import libraries
 import numpy as np
+import matplotlib.pyplot as plt
 from tensorboardX import SummaryWriter
 
 # import torch dependencies
@@ -108,12 +109,18 @@ class Trainer():
         self.test()
         for self.epoch in range(1, self.n_epochs+1):
             self.train()
-            self.test()
+            _ = self.test()
             print('#### Epoch {} ####'.format(self.epoch))
+
+        # perform final test inference
+        output = self.plot()
 
         self.writer.close()
         torch.save(self.policy.state_dict(), 
                    self.result_path+self.experiment+'/model.pt')
+
+        # return test inference result
+        return output
 
     def train(self):
         correct = 0
@@ -148,11 +155,16 @@ class Trainer():
             self.global_step += 1
 
             if batch_idx % self.log_interval == 0:
-                self.writer.add_scalars('loss', {'train':loss}, self.global_step)
-                self.writer.add_scalars('actLoss', {'train':act_loss}, self.global_step)
-                self.writer.add_scalars('goalLoss', {'train':goal_loss}, self.global_step)
-                self.writer.add_scalars('modeLoss', {'train':mode_loss}, self.global_step)
-        self.writer.add_scalars('accuracy', {'train':100.*correct/len(self.train_loader.dataset)}, 
+                self.writer.add_scalars('loss', {'train':loss},
+                                        self.global_step)
+                self.writer.add_scalars('actLoss', {'train':act_loss},
+                                        self.global_step)
+                self.writer.add_scalars('goalLoss', {'train':goal_loss},
+                                        self.global_step)
+                self.writer.add_scalars('modeLoss', {'train':mode_loss},
+                                        self.global_step)
+        self.writer.add_scalars('accuracy', 
+                                {'train':100.*correct/len(self.train_loader.dataset)}, 
                                 self.global_step)
 
     def test(self):
@@ -168,7 +180,7 @@ class Trainer():
                     sample[key] = sample[key].cuda()
                 for key in sample.keys():
                     sample[key] = Variable(sample[key])
-        
+
             action, goal, mode = self.policy(sample['state'])
 
             # setup loss function
@@ -188,9 +200,99 @@ class Trainer():
         test_goal_loss /= len(self.test_loader.dataset)/self.batch_size
         test_mode_loss /= len(self.test_loader.dataset)/self.batch_size
         
-        self.writer.add_scalars('loss', {'test':test_loss}, self.global_step)
-        self.writer.add_scalars('actLoss', {'test':test_act_loss}, self.global_step)
-        self.writer.add_scalars('goalLoss', {'test':test_goal_loss}, self.global_step)
-        self.writer.add_scalars('modeLoss', {'test':test_mode_loss}, self.global_step)
-        self.writer.add_scalars('accuracy', {'test':100.*correct/len(self.test_loader.dataset)}, 
+        self.writer.add_scalars('loss', {'test':test_loss},
                                 self.global_step)
+        self.writer.add_scalars('actLoss', {'test':test_act_loss},
+                                self.global_step)
+        self.writer.add_scalars('goalLoss', {'test':test_goal_loss}, 
+                                self.global_step)
+        self.writer.add_scalars('modeLoss', {'test':test_mode_loss}, 
+                                self.global_step)
+        self.writer.add_scalars('accuracy', 
+                                {'test':100.*correct/len(self.test_loader.dataset)}, 
+                                self.global_step)
+
+    def plot(self):
+        self.policy.eval()
+
+        # output dictionary to be returned by test function
+        output = {'pred': {'action': [], 'goal': [], 'mode': []}, 
+                  'true': {'action': [], 'goal': [], 'mode': []}}
+
+        for sample in self.test_loader:
+            if self.is_cuda:
+                for key in sample.keys():
+                    sample[key] = sample[key].cuda()
+                for key in sample.keys():
+                    sample[key] = Variable(sample[key])
+
+            action, goal, mode = self.policy(sample['state'])
+
+            pred = F.softmax(action, dim=1).data.max(1, keepdim=True)[1] 
+            dog_mode = F.softmax(mode, dim=1).data.max(1, keepdim=True)[1]
+
+
+            # append to dictionary
+            output['pred']['goal'].append(goal.detach().cpu().numpy())
+            output['pred']['action'].append(pred.detach().cpu().numpy())
+            output['pred']['mode'].append(dog_mode.detach().cpu().numpy())
+
+            output['true']['mode'].append(sample['mode'].cpu().numpy())
+            output['true']['goal'].append(sample['goal'].cpu().numpy())
+            output['true']['action'].append(sample['action'].cpu().numpy())
+
+        output['true']['goal'] = np.concatenate(output['true']['goal'])
+        output['true']['mode'] = np.concatenate(output['true']['mode'])
+        output['true']['action'] = np.concatenate(output['true']['action'])
+
+        output['pred']['goal'] = np.concatenate(output['pred']['goal'])
+        output['pred']['mode'] = np.concatenate(output['pred']['mode'])
+        output['pred']['action'] = np.concatenate(output['pred']['action'])
+
+        # evaluate test performance
+        plot_size = 250
+        xdata = np.arange(plot_size)
+
+        # plot the shepherding mode
+        plt.figure()
+        plt.plot(xdata, output['true']['mode'][:plot_size,0], 
+                 '--k', linewidth=2, label='True')
+        plt.plot(xdata, output['pred']['mode'][:plot_size,0], 
+                 '-b', linewidth=2, label='Pred')
+
+        plt.legend()
+        plt.xlabel('Sample #', fontsize=20)
+        plt.ylabel('Dog Mode', fontsize=20)
+        plt.title('Dog Shepherding Mode', fontsize=20)
+        plt.tight_layout()
+
+        # plot the dog action
+        plt.figure()
+        plt.plot(xdata, output['true']['action'][:plot_size,0], 
+                 '--k', linewidth=2, label='True')
+        plt.plot(xdata, output['pred']['action'][:plot_size,0], 
+                 '-b', linewidth=2, label='Pred')
+
+        plt.legend()
+        plt.xlabel('Sample #', fontsize=20)
+        plt.ylabel('Dog Action', fontsize=20)
+        plt.title('Dog Action', fontsize=20)
+        plt.tight_layout()
+
+        # plot the intermediate goal
+        plt.figure()
+        plt.plot(xdata, output['true']['goal'][:plot_size,0], 
+                 '--k', linewidth=2, label='True')
+        plt.plot(xdata, output['pred']['goal'][:plot_size,0], 
+                 '-b', linewidth=2, label='Pred')
+
+        plt.legend()
+        plt.xlabel('Sample #', fontsize=20)
+        plt.ylabel('Goal Position', fontsize=20)
+        plt.title('Dog Intermediate Goal', fontsize=20)
+        plt.tight_layout()
+
+        # show the plots
+        plt.show()
+
+        return output
