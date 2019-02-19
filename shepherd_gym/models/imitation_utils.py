@@ -104,7 +104,7 @@ class Trainer():
         self.global_step = 0
         self.writer = SummaryWriter(log_dir=self.result_path+self.experiment)
 
-    def run(self):
+    def run(self, should_display=True):                                 # [CHANGED]
 
         self.test()
         for self.epoch in range(1, self.n_epochs+1):
@@ -113,7 +113,7 @@ class Trainer():
             print('#### Epoch {} ####'.format(self.epoch))
 
         # perform final test inference
-        output = self.plot()
+        output = self.plot(should_display=should_display)               # [CHANGED]
 
         self.writer.close()
         torch.save(self.policy.state_dict(), 
@@ -212,7 +212,7 @@ class Trainer():
                                 {'test':100.*correct/len(self.test_loader.dataset)}, 
                                 self.global_step)
 
-    def plot(self):
+    def plot(self, should_display=True):                                # [CHANGED]
         self.policy.eval()
 
         # output dictionary to be returned by test function
@@ -248,9 +248,15 @@ class Trainer():
         output['pred']['goal'] = np.concatenate(output['pred']['goal'])
         output['pred']['mode'] = np.concatenate(output['pred']['mode'])
         output['pred']['action'] = np.concatenate(output['pred']['action'])
-
+        
+        # [CHANGED]
+        # If no longer need to display the graphs, return the output immediately
+        if not should_display:
+            return output
+        
+        # Otherwise, show the graphs as normal
         # evaluate test performance
-        plot_size = 250
+        plot_size = min(250,len(self.test_loader.dataset))
         xdata = np.arange(plot_size)
 
         # plot the shepherding mode
