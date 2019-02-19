@@ -51,13 +51,17 @@ def main():
     parser.add_argument('--droprate', type=float, default=0.0, 
                         help='dropout rate for network')
     parser.add_argument('--lossweights', nargs='+', type=float, 
-                        default=[1.0,0.1,0.1], 
+                        default=[1.0,0,0], 
                         help='weights for loss function')
     parser.add_argument('--learnrate', type=float, default=1e-3, 
                         help='learning rate for optimizer')
+    parser.add_argument('--num_sheep', type=int, default=25, 
+                        help='number_of_sheep')
 
+    
     # parse arguments
     args = parser.parse_args()
+    num_sheep = args.num_sheep
 
     # initialize torch environment
     seed = args.seed
@@ -144,7 +148,7 @@ def main():
         trainer = Trainer(experiment, policy, train_loader, test_loader, 
                           optimizer, n_epochs=n_epochs, is_cuda=is_cuda, 
                           loss_weights=loss_weights, result_path=result_path)
-        output = trainer.run()
+        output = trainer.run(should_display=False)                      # [CHANGED]
         print('### Training Completed ###')
 
     # load trained model
@@ -162,6 +166,7 @@ def main():
     if mode == 'test':
         # create new environment
         env = gym.make(args.env)
+        env.num_sheep = num_sheep
         if args.display:
             env.render()
 
@@ -200,7 +205,10 @@ def main():
         # shutdown env
         env.close()
         print('### Testing Completed ###')
-        print(f'Sucess Rate: {success_trials/n_episodes}')
+        print(f'Success Rate: {success_trials/n_episodes}')
+        
+        with open('temp_results.txt', 'a+') as results_file:            # [CHANGED]
+            results_file.write(str(success_trials/n_episodes) + "\n")   # [CHANGED]
 
 if __name__=='__main__':
     main()
