@@ -44,8 +44,9 @@ def main():
         dataset = []
 
     # loop over dataset files
+    ep_inds = np.random.choice(1000,n_episodes)
     for n in range(n_episodes):
-        tmp = np.loadtxt('{}/trial{}'.format(data_path,n+1),delimiter=',')
+        tmp = np.loadtxt('{}/trial{}'.format(data_path,ep_inds[n]+1),delimiter=',')
         
         if data_mode == 'il':
             dataset['lengths'][n] = tmp.shape[0]
