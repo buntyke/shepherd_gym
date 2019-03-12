@@ -52,6 +52,8 @@ def main():
     is_cuda = not args.nocuda
 
     torch.manual_seed(seed)
+    np.random.seed(seed)
+
     if is_cuda:
         torch.cuda.manual_seed(seed)
         torch.backends.cudnn.deterministic = True
