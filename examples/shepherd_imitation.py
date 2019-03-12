@@ -28,7 +28,7 @@ def main():
 
     # optional arguments
     parser.add_argument('-m', '--mode', type=str, default='train', 
-                        help='mode for algorithm')
+                        help='mode for algorithm: train,eval,test')
     parser.add_argument('-n', '--episodes', type=int, default=10,
                         help='number of episodes for evaluation')
     parser.add_argument('--display', action='store_true', default=False,
@@ -41,7 +41,7 @@ def main():
                         help='seed value for reproducibility')
     parser.add_argument('--dataseed', type=int, default=42, 
                         help='data loader seed value')
-    parser.add_argument('--data', type=str, default='../data/heuristic', 
+    parser.add_argument('--data', type=str, default='heuristic', 
                         help='path to dataset folder')
     parser.add_argument('--results', type=str, default='../results/imitation/',
                         help='path to results folder')
@@ -73,9 +73,9 @@ def main():
 
     # initialize variables
     mode = args.mode
-    data_path = args.data
     result_path = args.results
     experiment = args.experiment
+    data_path = '../data/{}'.format(args.data)
 
     n_epochs = args.epochs
     drop_rate = args.droprate

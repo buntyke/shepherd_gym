@@ -30,11 +30,6 @@ Usage
 
 This package has several scripts:
 
-* To run a simulation of the heuristic model:
-  ```
-  $ python examples/shepherd_sim.py
-  ```
-
 * To test the dog heuristic model with the shepherd gym env:
   ```
   $ python examples/shepherd_heuristic.py
@@ -59,9 +54,9 @@ Follow the following sequence to experiment with imitation learning
 
 * Preprocess the training dataset into a pickle file:
   ```
-  $ python dataset_process.py -d ../data/heuristic
+  $ python dataset_process.py -d heuristic
   ```
-  This should create a pickle file with processed dataset.
+  This should create a pickle file with processed dataset in `data/heuristic` folder.
 
 * Training imitation learning model:
   ```

@@ -35,7 +35,11 @@ def main():
                         help='number of episodes')
     parser.add_argument('-s', '--seed', default=41, type=int, 
                         help='seed value for reproducibility')
+    parser.add_argument('--nsheep', default=100, type=int, 
+                        help='number of sheep')
 
+    parser.add_argument('--evaluate', action='store_true', default=False,
+                        help='flag to evaluate heuristic model')
     parser.add_argument('--store', action='store_true', default=False, 
                         help='flag to store experience')
     parser.add_argument('--noplot', dest='plot', action='store_false', 
@@ -52,6 +56,7 @@ def main():
     model = args.model
 
     seed = args.seed
+    n_sheep = args.nsheep
     n_trials = args.ntrials
 
     render_sim = args.render
@@ -94,6 +99,7 @@ def main():
     # initialize list to store dataset
     dataset = []
     n_samples = []
+    n_attempts = 0
 
     n = 0
     while n < n_trials:
@@ -131,6 +137,9 @@ def main():
             # update state
             state = new_state
 
+        # update attempts
+        n_attempts += 1
+
         # check for failure
         if trial_data.shape[0] == 0 or shepherd_env.target_distance>1.0:
             print('Fail!')
@@ -143,8 +152,20 @@ def main():
         # information
         print('Finish simulation: {}'.format(n))
 
+        # break for valid attempts
+        if n_attempts==n_trials and args.evaluate:
+            break
+
     # stop the simulations
     shepherd_env.close()
+
+    # evaluate the success rate
+    success_rate = n/n_trials   
+    print('success_rate:', success_rate)
+    
+    with open('success_rates.csv', 'a') as success_rates_file:
+        data = '{}, {}, {}, {}\n'.format(seed, n_trials, n_sheep, success_rate)
+        success_rates_file.write(data)
 
     # store experience to files
     if store_dataset:
@@ -171,7 +192,6 @@ def main():
         plt.savefig('{}/rewards.png'.format(exp_path))
 
         plt.show()
-
 
 if __name__=='__main__':
     main()

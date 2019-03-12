@@ -13,18 +13,21 @@ def main():
     parser.add_argument('-d','--datapath',type=str,default='../data/heuristic',
                         help='path to dataset')
     parser.add_argument('-m','--mode',type=str,default='il',
-                        help='mode to preprocess dataset')
+                        help='mode to preprocess dataset: il, dump')
     parser.add_argument('-n','--nepisodes',type=int,default=1000,
                         help='number of episodes to parse')
     parser.add_argument('-p','--percenttest',type=float,default=0.05, 
                         help='percentage of dataset as test')
+    parser.add_argument('--maxepisodes',type=int,default=1000,
+                        help='maximum number of episodes in folder')
 
     # parser arguments
     args = parser.parse_args()
+
     data_mode = args.mode
-    data_path = args.datapath
     n_episodes = args.nepisodes
     n_test = int(args.percenttest*n_episodes)
+    data_path = '../data/{}'.format(args.datapath)
 
     # variables for dataset
     n_goal = 2
@@ -44,8 +47,9 @@ def main():
         dataset = []
 
     # loop over dataset files
+    ep_inds = np.random.choice(args.maxepisodes, n_episodes)
     for n in range(n_episodes):
-        tmp = np.loadtxt('{}/trial{}'.format(data_path,n+1),delimiter=',')
+        tmp = np.loadtxt('{}/trial{}'.format(data_path,ep_inds[n]+1),delimiter=',')
         
         if data_mode == 'il':
             dataset['lengths'][n] = tmp.shape[0]
