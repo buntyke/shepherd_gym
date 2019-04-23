@@ -80,11 +80,13 @@ class Trainer():
     
     def __init__(self, experiment, policy, train_loader, test_loader, optimizer,  
                  result_path='../results/imitation/', n_epochs=20, is_cuda=True, 
-                 log_interval=50, loss_weights=[1.0,0.1,0.1], batch_size=64):
+                 log_interval=50, loss_weights=[1.0,0.1,0.1], batch_size=64,
+                 loss_func='ce'):
 
         # initialize variables
         self.is_cuda = is_cuda
         self.n_epochs = n_epochs
+        self.loss_func = loss_func
         self.batch_size = batch_size
         self.log_interval = log_interval
         self.loss_weights = loss_weights
@@ -109,7 +111,7 @@ class Trainer():
         self.test()
         for self.epoch in range(1, self.n_epochs+1):
             self.train()
-            _ = self.test()
+            self.test()
             print('#### Epoch {} ####'.format(self.epoch))
 
         # perform final test inference
@@ -137,17 +139,24 @@ class Trainer():
             self.optimizer.zero_grad()
             action, goal, mode = self.policy(sample['state'])
 
-            # setup loss function
-            goal_loss = F.mse_loss(goal, sample['goal'])
-            mode_loss = F.cross_entropy(mode, sample['mode'][:,0])
-            act_loss = F.cross_entropy(action, sample['action'][:,0])
-            loss = self.loss_weights[0]*act_loss \
-                    + self.loss_weights[1]*goal_loss \
-                    + self.loss_weights[2]*mode_loss
-
             # get index of max log-probability
             pred = F.softmax(action, dim=1).data.max(1, keepdim=True)[1] 
             correct += pred.eq(sample['action'].data.view_as(pred)).cpu().sum()
+
+            # setup loss function
+            goal_loss = F.mse_loss(goal, sample['goal'])
+            mode_loss = F.cross_entropy(mode, sample['mode'][:,0])
+
+            if self.loss_func == 'ce':
+                act_loss = F.cross_entropy(action, sample['action'][:,0])
+            elif self.loss_func == 'mse':
+                act_pred = pred.type(torch.cuda.FloatTensor)
+                act_target = sample['action'].type(torch.cuda.FloatTensor)
+                act_loss = F.mse_loss(act_pred, act_target)
+
+            loss = self.loss_weights[0]*act_loss \
+                    + self.loss_weights[1]*goal_loss \
+                    + self.loss_weights[2]*mode_loss
 
             # perform backpropogation
             loss.backward()
@@ -183,15 +192,21 @@ class Trainer():
 
             action, goal, mode = self.policy(sample['state'])
 
-            # setup loss function
-            test_goal_loss += F.mse_loss(goal, sample['goal']).data
-            test_mode_loss += F.cross_entropy(mode, sample['mode'][:,0]).data
-            test_act_loss += F.cross_entropy(action, sample['action'][:,0]).data
-
             # get index of max log-probability
             pred = F.softmax(action, dim=1).data.max(1, keepdim=True)[1] 
             correct += pred.eq(sample['action'].data.view_as(pred)).cpu().sum()
 
+            # setup loss function
+            test_goal_loss += F.mse_loss(goal, sample['goal']).data
+            test_mode_loss += F.cross_entropy(mode, sample['mode'][:,0]).data
+
+            if self.loss_func == 'ce':
+                test_act_loss += F.cross_entropy(action, sample['action'][:,0]).data
+            elif self.loss_func == 'mse':
+                act_pred = pred.type(torch.cuda.FloatTensor)
+                act_target = sample['action'].type(torch.cuda.FloatTensor)
+                test_act_loss += F.mse_loss(act_pred, act_target).data
+            
         test_loss = self.loss_weights[0]*test_act_loss + self.loss_weights[1]*test_goal_loss \
                     + self.loss_weights[2]*test_mode_loss        
 
