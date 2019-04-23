@@ -55,6 +55,8 @@ def main():
                         help='weights for loss function')
     parser.add_argument('--learnrate', type=float, default=1e-3, 
                         help='learning rate for optimizer')
+    parser.add_argument('--lossfunc', type=str, default='ce',
+                        help='loss function used to train agent')
 
     # parse arguments
     args = parser.parse_args()
@@ -79,6 +81,7 @@ def main():
 
     n_epochs = args.epochs
     drop_rate = args.droprate
+    loss_func = args.lossfunc
     n_episodes = args.episodes
     learn_rate = args.learnrate
     loss_weights = args.lossweights
@@ -143,7 +146,8 @@ def main():
         # define trainer class and run
         trainer = Trainer(experiment, policy, train_loader, test_loader, 
                           optimizer, n_epochs=n_epochs, is_cuda=is_cuda, 
-                          loss_weights=loss_weights, result_path=result_path)
+                          loss_weights=loss_weights, result_path=result_path,
+                          loss_func=loss_func)
         output = trainer.run()
         print('### Training Completed ###')
 
